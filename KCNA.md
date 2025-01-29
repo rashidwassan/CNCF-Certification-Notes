@@ -24,14 +24,16 @@
 - Docker support from Kubernetes was removed in 1.24.
 - Dockershim was basically removed.
 - `ContainerD`, that powered Docker, now works directly with Kubernetes.
+- Docker primarily uses `LXC` container technology.
 
-### ContainerD
+### ContainerD and CLI
 - Comes with commandline tool `ctr` for debugging, has limited functionality.
 - However, `nerdctl` provided a Docker-like CLI for ContainerD and supports Docker Compose.
+- Nerdctl also supports new features and implementations of containerd.
 - Supports Lazy Pulling.
 > 😃 "Lazy pulling" in Kubernetes refers to a technique where a container image is not fully downloaded from a registry before a container is launched; instead, only the necessary parts of the image are pulled on-demand as they are needed during runtime, significantly reducing startup time and optimizing resource usage.
 
-### crictl (installed separately)
+### crictl (installed separately) - Managed by Kubernetes Community
 - A command-line tool for managing Kubernetes container runtimes that implement the Container Runtime Interface (CRI), such as containerd and CRI-O.
 - Used for debugging and troubleshooting Kubernetes nodes by inspecting containers, pods, images, and logs without relying on kubectl.
 - Uses **/etc/crictl.yaml** for runtime settings, typically pointing to a `CRI runtime socket` (e.g., /run/containerd/containerd.sock for containerd).
