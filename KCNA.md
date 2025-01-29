@@ -27,3 +27,13 @@
 
 ### ContainerD
 - Comes with commandline tool `ctr` for debugging, has limited functionality.
+- However, `nerdctl` provided a Docker-like CLI for ContainerD and supports Docker Compose.
+- Supports Lazy Pulling.
+> 😃 "Lazy pulling" in Kubernetes refers to a technique where a container image is not fully downloaded from a registry before a container is launched; instead, only the necessary parts of the image are pulled on-demand as they are needed during runtime, significantly reducing startup time and optimizing resource usage.
+
+### crictl (installed separately)
+- A command-line tool for managing Kubernetes container runtimes that implement the Container Runtime Interface (CRI), such as containerd and CRI-O.
+- Used for debugging and troubleshooting Kubernetes nodes by inspecting containers, pods, images, and logs without relying on kubectl.
+- Uses **/etc/crictl.yaml** for runtime settings, typically pointing to a `CRI runtime socket` (e.g., /run/containerd/containerd.sock for containerd).
+- Kubelet will delete containers that are manually created with crictl since it would be unaware of such containers.
+> A container runtime socket is a Unix domain socket file that facilitates communication between the Kubernetes kubelet and the underlying container runtime.
