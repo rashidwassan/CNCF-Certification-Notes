@@ -1,5 +1,23 @@
 # KCNA
 
+### Cloud Native Computing Foundation (CNCF)
+- A project by Linux Foundation launched in 2015 to help advance container technology.
+- Independent organization from its parent.
+
+### Cloud Native Trail Map
+
+![image](https://www.cncf.io/wp-content/uploads/2020/08/CNCF_TrailMap_latest-1.png)
+1. Containerization
+2. Continuous Integration and Deployment (CI/CD)
+3. Orchestration and Application Definition
+4. Observability and Analysis
+5. Service Proxy, Discovery & Mesh
+6. Network Policy & Security
+7. Distibuted Databases & Storage
+8. Streaming & Messaging 
+9. Container Registry & Runtime
+10. Software Distribution
+
 - `Etcd` is fully replicated in every master node.
 - Kube Api Server makes a master a master.
 - Kubelet makes a worker a worker.
@@ -39,3 +57,11 @@
 - Uses **/etc/crictl.yaml** for runtime settings, typically pointing to a `CRI runtime socket` (e.g., /run/containerd/containerd.sock for containerd).
 - Kubelet will delete containers that are manually created with crictl since it would be unaware of such containers.
 > A container runtime socket is a Unix domain socket file that facilitates communication between the Kubernetes kubelet and the underlying container runtime.
+
+### YAML ApiVersions & Indentation
+- Pod = v1
+- Service = v1
+- ReplicaSet = apps/v1
+- Deployment = apps/v1
+
+> HINT: Prefer using two spaces for indentation instead of tab.
