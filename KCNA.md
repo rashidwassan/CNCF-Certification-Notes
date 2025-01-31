@@ -65,3 +65,30 @@
 - Deployment = apps/v1
 
 > HINT: Prefer using two spaces for indentation instead of tab.
+
+### Kubernetes: ReplicationController vs ReplicaSet
+- Major difference is `selector` being required in ReplicaSet, not in Replication controller.
+- Yes, you can manage replications of other pods that are not created by ReplicaSet but have matching label for selector.
+- Labels in spec->selector->matchLabels === spec->template->metadata->labels
+> TERMINATION STATE: ReplicaSet does not allow the manual creation of pod with same label as pods realted to that RS.
+> Doing so will terminate newly created pod if the desired number of replicas are already running.
+
+### Kubectl Replace
+- Works like apply command, but recreates the resouce than making changes to existing one.
+- Can be considered if working with ingress, secrets, and/or storage resources.
+
+```bash
+    kubectl replace -f ingress.yaml
+```
+### Rolling Updates in Deployments
+- Pods are replaced by new ones, one by one, with no application downtime.
+- Kubernetes creates a new ReplicaSet and keeps creating new pods there and doing the opposite in older ReplicaSet.
+- `Undo` command does the opposite of second point mentioned. Upon execution, it starts creating pods in old ReplicaSet while deleting pods from the recent one.
+- There can be more than one or two ReplicaSets present for each deployment, supporting cascading rollbacks.
+- Commands
+
+```bash
+    kubectl rollout status deployment/my-deployment
+    kubectl rollout history deploy my-deployment
+    kubectl rollout undo deploy my-deployment
+```
