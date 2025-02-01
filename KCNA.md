@@ -92,3 +92,92 @@
     kubectl rollout history deploy my-deployment
     kubectl rollout undo deploy my-deployment
 ```
+
+### Listing Resources Present in All Namespaces
+```bash
+    kubectl get pods --all-namespaces
+```
+
+### Resource Qoutas in Kubernetes
+
+### Accessing Resources Residing in Other Namespaces
+- The format will be `resourceName.namespaceName.resourceType.cluster.local`.
+
+### Manual Scheduling
+- Specify `spec->nodeName` field to manually schedule the pod on a specic node.
+- To schedule an **existing pod** to a node, create a `Binding` object having meatadata.name value equal to metadata.labels.name in pod definition. Then sent a POST request to the pod's binding API containing JSON file obtained after converting binding object YAML to JSON. 
+- A `binding object` refers to a specific type of resource that is used to link a Pod to a particular node within the cluster.
+
+### Labels and Selectors in Kubernetes
+- Labels are used to group or identify resources and selectors are used to select resources with specific labels.
+```bash
+    kubectl get pods --selector app=App1
+```
+
+### Taints & Tolerations
+- Taints are used for nodes
+```bash
+    kubectl taint nodes <nodename> key=value:taint-effect
+```
+- **Taint Effects:** NoSchedule, PreferNoSchedule, NoExecute
+- Tolerations are applied on pods.
+```yaml
+# add this in pod manifest.
+spec:
+  tolerations:
+  - key: "app"
+    operator: "="
+    value: "blue"
+    effect: "No Schedule"
+
+```
+- Adding No Schedule taint on a node having running pods will cause pods with no supported tolerations to evict.
+- There are changes of a pod having matching tolerations get scheduled to another node as taints only make nodes to only schedule pods with matching tolerations.
+- To find taints on master node:
+``` bash
+    kubectl describe node kubemaster | grep Taint
+```
+
+### Node Selectors
+- Proivde another approach for scheduling by adding `nodeSelector` property in pod yaml file spec.
+- This value must match with the label assigned to the node(s) to get that pod scheduled on that node.
+- To label a node:
+```bash
+    kubectl label nodes <node-name> <label-key>=<label-value>
+```
+- In pod manifest:
+```yaml
+spec:
+  nodeSelector:
+    <label-key>: <label-value>
+```
+- NodeSelector only allows you to select nodes with lables, it will not provide conditional selection or more flexible selection.
+> NOTE: You must label node(s) before scheduling pods on them.
+
+### Node Affinity:
+- Node affinity supports expressions like In, NotIn, Exists, for scheduling.
+- Provides more features compared to NodeSelectors.
+- Ensures correct scheduling compared to Taints and Tolerations where a pod with tolerations can end up being scheduled at node with no any taint.
+- The syntax looks like this:
+```yaml
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values:
+            - antarctica-east1
+            - antarctica-west1
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+```
+> You can use Tains & Tolerations and Affinty for more customized scheduling.
