@@ -107,6 +107,7 @@
 - Specify `spec->nodeName` field to manually schedule the pod on a specic node.
 - To schedule an **existing pod** to a node, create a `Binding` object having meatadata.name value equal to metadata.labels.name in pod definition. Then sent a POST request to the pod's binding API containing JSON file obtained after converting binding object YAML to JSON. 
 - A `binding object` refers to a specific type of resource that is used to link a Pod to a particular node within the cluster.
+> Using nodeName spec will ignore scheduler, i.e, manual scheduling using nodeName property will work even scheduler component in control-plane stopped.
 
 ### Labels and Selectors in Kubernetes
 - Labels are used to group or identify resources and selectors are used to select resources with specific labels.
@@ -181,3 +182,97 @@ spec:
             - another-node-label-value
 ```
 > You can use Tains & Tolerations and Affinty for more customized scheduling.
+
+### Resource Requests and Limits
+- CPU resources in Kubernetes are specified in cores or millicores, where 1 core equals 1000m, allowing fine-grained control over resource allocation; CPU is compressible, meaning containers can exceed requests if extra capacity is available.
+- Memory resources are defined using binary (Mi, Gi) or decimal (M, G) units, with binary units using powers of 2 `(1Gi=1024Mi)` and decimal units using powers of 10 `(1G=1000M)`; memory is non-compressible, and exceeding limits results in container termination.
+- Resource requests define the minimum guaranteed allocation for a container, while limits set the maximum usage allowed; exceeding CPU limits leads to throttling, whereas exceeding memory limits causes the container to be killed with `OOM (Out of Memory)` error.
+- Using requests only (for CPU), can be a good approach since it guarantees requested resources to pods with flexibility of providing them more if needed and available, unlike limits.
+- `LimitRange` objects are used to define default limits and requets, sample code:
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: resource-limits
+  namespace: default
+spec:
+  limits:
+  - type: Container
+    default:
+      cpu: "1"
+      memory: "512Mi"
+    defaultRequest:
+      cpu: "500m"
+      memory: "256Mi"
+    max:
+      cpu: "2"
+      memory: "1Gi"
+    min:
+      cpu: "100m"
+      memory: "128Mi"
+```
+> These limit ranges are only appied to new pods after application.
+
+### Resource Quotas
+- A ResourceQuota enforces resource constraints at the namespace level, limiting the total number of pods and the overall CPU/memory usage across all workloads.
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: namespace-quota
+  namespace: default
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "2"
+    requests.memory: "2Gi"
+    limits.cpu: "4"
+    limits.memory: "4Gi"
+```
+
+### DaemonSet
+- Makes sure to run pod on each node.
+- Defined with YAML code similar to that of a ReplicaSet, with kind DaemonSet.
+
+### Static Pods
+- Kubelet can can manage a node standalone, even without control-plane.
+- Kubelet only undersandstores all the manifests of pods (ONLY) in `/etc/kubernetes/manifests` directory and regularly updates them.
+- You can change the default manifest path by providing cmd params when running kubelet service, or this can be done by modifying the manifst and providing it into params.
+- ![Kubelet Commandline](images/kcna/kubelet.png)
+- Remember, kubectl commands will not work for pod management in the absense of control plane nodes. However, CRI specific commands can be used for debugging.
+- Pods that are creating using these manifests stored by kubelet are called `static pods`.
+
+### Kubelet and API Server
+- Kubelet can create both, static pods and pods from API Server.
+- Kube APIServer is aware of static pods too, as kubelet creates `mirror objects` of pods in APIServer.
+- API Server provides pod definitions using HTTP protocol.
+
+### Usecases (Static Pods)
+- Control Plane Components (remember /etc/kubernetes/manifests on control plane containing manifests of control plane component pods).
+
+> Static Pods and DaemonSet Pods are ignored by Kube-Scheduler.
+
+### Multiple Schedulers
+- You can extend functionality of the kube-scheduler.
+- You can also write custom schedulers that can run standalone or in coordination with kube-scheduler.
+- `spec.schedulerName` in pod manifest can be used to make that sepcific scheduler schedule the pod.
+
+### Priority Class Resource
+- Used to declare priority for scheduling pods.
+- In pod manifest `spec priorityClassName`, can be set.
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "This PriorityClass is for high-priority workloads."
+
+```
+
+### Scheduling Plugins and Extension Points
+- Provide highly modular structure of Kubernetes.
+- Allow the injection of custom functionality easily.
+- ![SP&EP](images/kcna/spep.png)
