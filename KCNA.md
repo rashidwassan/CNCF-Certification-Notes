@@ -276,3 +276,32 @@ description: "This PriorityClass is for high-priority workloads."
 - Provide highly modular structure of Kubernetes.
 - Allow the injection of custom functionality easily.
 - ![SP&EP](images/kcna/spep.png)
+
+### Kubernetes Security
+- Hosts must have password authentication disabled and SSH key authentication enabled.
+- `APIServer` is the first line of defense.
+- Communication between Kubernetes components happens using TLS encryption.
+- By default, all pods can access each other within the cluster.
+
+### Accounts in Kubernetes
+- Users
+- Service Accounts
+- All user access is managed by APIServer.
+
+### Access Management using APIServer
+- APIServer uses different authentication mechanisms that can be configured. Like: static password files, static token files, certificates, and 3rd party identity services.
+- `Static Password Files:` CSV files containing 3 columns: **password, username, and user ID, however, 4th column `Group` is optional**. Can be provided as a commandline parameter **--basic-auth-file=<static-file-name>.csv**, can be added in Kube APIServer manifest in `/etc/kubernetes/manifests` directory. Kube APIServer needs to be restarted after adding this param to take effect.
+- Now, to authenticate user, send credentials using `-u` in curl command to APIServer.
+```bash
+curl -v -k https://master-node-ip:6443/api/v1/pods -u "user1:password123"
+```
+- Similarly, static token file contains tokens instead of passwords, structure is similar otherwise.
+- Token file can be added using **--token-auth-file=<user-details>.csv**.
+- For token based access:
+```bash
+curl -v -k https://master-node-ip:6443/api/v1/pods --header "Authorization: Bearer <token>"
+```
+
+> PLEASE REMEMBER: These plaintext based approaches are not the recommended ways to incorporate authentication in Kubernetes.
+
+### TLS Certifiacates in Kubernetes
