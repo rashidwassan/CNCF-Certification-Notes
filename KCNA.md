@@ -304,4 +304,47 @@ curl -v -k https://master-node-ip:6443/api/v1/pods --header "Authorization: Bear
 
 > PLEASE REMEMBER: These plaintext based approaches are not the recommended ways to incorporate authentication in Kubernetes.
 
-### TLS Certifiacates in Kubernetes
+### Self-signed CA Certificate Creation Process in Linux
+- Create OPENSSL key file:
+```bash
+openssl genrsa -out ca.key 2048
+```
+- Create a certificate signing request:
+```bash
+openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+```
+- Self sign the certificate signing request:
+```bash
+openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt
+```
+
+- By this time you will have `ca.crt`, `ca.csr`, `ca.key` files in the directory.
+- These files are specific to CA, and **will later be used to sign other certificates using these files**.
+
+### User TLS Certificate from Self Signed CA Certificate in Kubernetes
+- Create OPENSSL key file:
+```bash
+openssl genrsa -out admin.key 2048
+```
+- Create a certificate signing request with kube-admin as user name:
+```bash
+openssl req -new -key admin.key -subj "/CN=kube-admin" -out admin.csr
+```
+> PLEASE NOTE: User group can also be added to the certificate (just like static files), by adding -subj "/CN=kube-admin/O=system:masters"
+- Self sign the certificate signing request, here CA cert and key are used:
+```bash
+openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -out admin.crt
+```
+
+- By this time you will have `admin.crt`, `admin.csr`, `admin.key` files in the directory.
+- This process is much like creating a user account with admin.crt being legit certificate and user ID, while admin.key acting like a password. This is a very secure approach.
+
+> Every Kubernetes component has to have their own certificate just like this user, to interact.
+
+### Accessing the API Server using this certificate:
+```bash
+curl https://kube-apiserver:6443/api/v1/pods --key admin.key --cert admin.crt --cacert ca.crt
+```
+
+### Root CA Certificate
+- In order for each kubernetes components to verify each other, there must be a **root CA certificate**
