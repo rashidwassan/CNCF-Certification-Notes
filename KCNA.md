@@ -347,4 +347,169 @@ curl https://kube-apiserver:6443/api/v1/pods --key admin.key --cert admin.crt --
 ```
 
 ### Root CA Certificate
-- In order for each kubernetes components to verify each other, there must be a **root CA certificate**
+- In order for each kubernetes components to verify each other, there must be a **root CA certificate**.
+
+### CA Certificate Creation for APIServer
+- APIServer is also known as Kubernetes service.
+![](images/kcna/api-server-cert.png)
+
+### CA Certificates for Nodes
+- Named same as node names.
+- Certificate must contain group info `SYSTEM:NODES`.
+- `system:node:node2` format DNS.
+
+### KubeConfig
+- $HOME/user/.kube/config, stores necessary information like user and certificate info so that it can be readily available to be sent with requests to APIServer.
+- Clusters, contexts, and users are stored.
+- Context is like a mapping of user to a cluster, there can be multiple contexts for the same cluster.
+```bash
+kubectl config view
+```
+### API Groups
+- `Logical Grouping:` Kubernetes API is divided into API groups to organize and version different resources efficiently.
+- `Core & Named Groups:` The core API group (e.g., Pods, Nodes) has no prefix, while other groups (e.g., apps, batch) use group/version format (apps/v1).
+- `Stability & Evolution:` API groups have multiple versions (v1, v1beta1) to ensure smooth transitions and backward compatibility.
+- `Discovery & Access:` Use kubectl api-resources and kubectl api-versions to explore available API groups and versions.
+
+### Authorization in Kubernetes
+- Node: like kubelet talks to the APIServer.
+- Attribute-Based Access Control (ABAC): Like proividing an individual with necessary permissions, defined in a policy object.
+- Role-Based Access Control (RBAC): Works on roles and roleBindings
+- Webhook: Using third party like `Open Policy Agent` to manage access. In this case, upon receipt of requests, APIServer forwards it to the third party and third party decides either to provide access or not.
+- AlwaysAllow (passed into cmd params of APIServer pod or service)
+- AlwaysDeny (passed into cmd params of APIServer pod or service)
+> MULTIPLE authorization modes can also be configured in CMD params of APIServer service/pod. Authorization confirmation **series will be followed as specified in params**.
+
+### Role Based Access Controls
+- Roles & ClusterRoles: Define permissions for resources either namespace-scoped (Role) or cluster-wide (ClusterRole).
+- RoleBindings & ClusterRoleBindings: Attach roles to users, groups, or service accounts to grant access.
+- Principle of Least Privilege: Assign only necessary permissions to enhance security.
+- API Group Integration: Permissions are defined per API group, e.g., "" (core), apps, batch.
+- **Namespace Scoped Role:**
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: my-namespace
+  name: pod-reader
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+```
+- **Created Cluster Wide Role:**
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cluster-admin-read-only
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["get", "list", "watch"]
+```
+> You can make these permissions more granular by specifying **resourceNames** field just below verbs on same level of indentation.
+- **Bind Role to a User using RoleBindingObject**
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-reader-binding
+  namespace: my-namespace
+subjects:
+  - kind: User
+    name: my-user  # Replace with actual username
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+```
+> PLEASE Note: Roles and RoleBindings are **namespace** based.
+
+### Cluster Wide Roles
+- Defined just like namespaced roles, with `ClusterRole` and `ClusterRoleBinding` objects.
+### Checking Access (can-i)
+- kubectl auth, combined with `can-i` flag proivdes you the information about permission or having access to do some operations, the syntax goes like this:
+```bash
+kubectl auth can-i create deployments
+kubectl auth can-i delete nodes
+```
+- With admin rights, **you can check other user's access as well**.
+```bash
+kubectl auth can-i create deployments --as dev-user
+```
+
+### Namespaced and Cluste-wide Resources
+**Namespace Based Resources**
+- Pods
+- ReplicaSets
+- Jobs
+- Deployments
+- Services
+- Secrets
+- Roles
+- RoleBindings
+- Configmaps
+- PVC
+
+**Cluster Based Resources**
+- Nodes
+- PersistentVolumes (PVs)
+- ClusterRoles
+- ClusterRoleBindings
+- CertificateSigningRequests (CSRs)
+- Namespaces
+
+**To Check Comprehensive List of Classified Resources**
+```bash
+kubectl api-resources --namespaced=true
+kubectl api-resources --namespaced=false
+```
+### Kubernetes Service Accounts
+- Service accounts, unlike user accounts, are used by non-human entities like application components and other APIs that need to hit APIServer to fetch any information.
+- **Creating a ServiceAccount**
+```bash
+kubectl create serviceaccount <serviceaccount-name>
+```
+- Creating a serviceaccount also creates a token that will be used when making API requests.
+- You must delete and recreate the pod to change its service account.
+
+### Docker Images
+- If we use only image name like **image: nginx**, it is considered as **image: docker.io/library/nginx**.
+- Library is the account where all official docker images are uploaded.
+- ![dockerio](/images/kcna/dockerio.png)
+
+### Security Contexts in Kubernetes
+- Definition: securityContext defines security-related settings at the Pod or Container level, enforcing permissions, user privileges, and access control.
+- Pod vs. Container Scope: Security settings can be applied globally at the pod level or individually for each container.
+- **Key Fields:**
+  - `runAsUser:` Specifies the user ID the process runs as.
+  - `runAsGroup:` Sets the group ID for the process.
+  - `fsGroup:` Defines the file system group for volume mounts.
+  - `privileged:` Grants root-level access to the container (true = full access).
+  - `readOnlyRootFilesystem:` Enforces a read-only file system for enhanced security.
+
+- **Example: Security Contexts**
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-pod
+spec:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+  containers:
+    - name: app-container
+      image: nginx
+      securityContext:
+        privileged: false
+        readOnlyRootFilesystem: true
+```
+
+### Make Kubernetes Use Different KubeConfig file than Default One
+```bash
+kubectl config view --kubeconfig=my-config
+```
