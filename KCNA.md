@@ -287,6 +287,7 @@ description: "This PriorityClass is for high-priority workloads."
 - Users
 - Service Accounts
 - All user access is managed by APIServer.
+- Kubernetes has no built-in user account management, it uses third-party tools like LDAP for the same.
 
 ### Access Management using APIServer
 - APIServer uses different authentication mechanisms that can be configured. Like: static password files, static token files, certificates, and 3rd party identity services.
@@ -513,3 +514,76 @@ spec:
 ```bash
 kubectl config view --kubeconfig=my-config
 ```
+
+### Cluster Networking in Kubernetes
+- Each node must have one interface.
+- Unique hostnames and MAC addresses for each host.
+- Required ports must be open on respective nodes, like 6443 for API Server on master.
+- Port 10250 for kubelet, 10259 for kube-scheduler, 2379 for etcd, and 10257 for kube-controller-manager must be open.
+- Another port 2380 should also be open so that etcd clients can communicate with each other.
+- Worker nodes expose services on ports ranging between 30000-32767.
+- **PORTS GUIDE**
+![portsinfo](/images/kcna/ports-k8s.png)
+
+### Kubernetes Networking Model
+- Kubernets expects the solution of networking in such a way that:
+  - Every pod has its own IP address.
+  - Pods in same node can communicate to each other.
+  - Pods can communicate to pods in other nodes without NAT.
+- This is where CNI Plugins come into the picture, they provide the implementation of the same requirement by Kuberentes.
+
+### Services in Kubernetes
+- `NodePort:` Makes pod's particular port exposed on all nodes in the cluster. The service can be used by accessing any of node's IPs and the port exposed by the container.
+- `ClusterIP:` Makes pods accessible inside the cluster.
+- `LoadBalancer:` Works with load balancers already configured. It uses those load balancers to distribute traffic.
+
+### Sidecars
+- Containers that support main container are called sidecars.
+- They share same network and storage.
+
+### Envoy
+- Envoy is a proxy.
+- It runs as a sidecar to a container and manages TLS, auth, and traffic flow to the container.
+
+### Cross-cutting Issues in Microservices
+- In microservices architecture, the issue that often arise is working on same common features like auth and some common features shared among microservices again & again. This results in `fat microservices`.
+
+### Service Mesh
+- A service mesh provides a dedicated infrastructure layer for handling service-to-service communication, enabling traffic control, retries, timeouts, and load balancing without modifying application code.
+- Uses a sidecar proxy (e.g., Envoy in Istio, Linkerd proxy) deployed alongside each service to manage security, observability, and traffic routing transparently.
+- Implements mTLS (mutual TLS) for encryption, service discovery, and tracing/logging to enhance security and visibility into microservices traffic.
+
+### Istio
+- Free & open-source service mesh.
+- Uses envoy proxy.
+- Forms a data plane of proxies.
+
+### Installing Istio
+- Isticoctl
+- Istio Operator Install
+- Install with Helm
+
+### Docker Storage
+- `Union File System (OverlayFS):` Docker uses a copy-on-write (CoW) approach with a layered filesystem (e.g., OverlayFS, AUFS) to optimize storage and reduce duplication.
+- `Storage Drivers:` Docker supports multiple storage drivers (e.g., Overlay2, Btrfs, ZFS) based on the underlying OS and filesystem compatibility.
+- `Persistent Storage (Volumes & Bind Mounts):` Volumes are managed by Docker and stored in /var/lib/docker/volumes, whereas bind mounts directly map host directories into containers.
+- `tmpfs (In-Memory Storage):` Containers can use tmpfs to store ephemeral data in RAM, improving speed and security but losing data on restart.
+
+### Storage Drivers
+- Manage storage in images and containers.
+
+### Volumes
+- Not handeled by storage drives.
+- Handled by volume driver plugins.
+- Pods created in Kuberentes, like in Docker, are transient, they do not retain data.
+
+### Persistent Volumes
+- Cluster-wide pool of storage volumes. 
+- Provide central approach to manage voumes in Kubernetes.
+
+### Persistent Volume Claims
+- Ideally, an administrator creates a Persistent Volume, and users create Persistent Volume Claims.
+- Kubernetes then binds PVc with proper PV.
+
+### Storage Class
+- Facilitates dynamic provisioning of PV using providers like Google Cloud, or any other.
