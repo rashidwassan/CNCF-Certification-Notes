@@ -620,3 +620,58 @@ kubectl config view --kubeconfig=my-config
   - Disk Space
   - Service Uptime
   - Application Specific Metrics
+
+### Prometheus Architecture
+There are three parts that make up a Prometheus server:
+- Retrieval: Scrapes Metric Data
+- TSDB: Stores Metric Data
+- HTTP Server: Accepts PromQl queries.
+
+On the other hand, `exporters` are used on targets so that Prometheus can pull metrics from them.
+
+- Service Discovery: Since Prometheus wants you to hard code and specify all the targets, in environments like Kubernetes and cloud, where resources are dynamically provisioned, `sevice discovery` helps in identifying targets.
+- `Alert Manager`: Manages actions on alerts.
+- Prometheus works by sending https requests to /metrics endpoint of each target.
+- `Client Libararies` allow you to expose metrics for Prometheus from the application itself.
+- Prometheus uses `Pull Based` model to get metrics from exporters on targets.
+- Prometheus PusGateway solves the issue with short-lives jobs not reponding to pulls after some time.
+
+### Prometheus Node Exporters
+- Used to export metrics on a Linux host.
+- Scraps are collected with the timestamp at which they get extracted.
+- Prometheus follows `UNIX timestamp` convention. A single large number.
+- Metrics must match a particular regular expression.
+
+### Types of Metrics in Prometheus
+- Counter - a number that can only increase.
+- Gauge - measures current value.
+- Histogram - how long or how a big something is.
+- Summary - similar to histogram.
+
+### Labels
+- Every instance is assigned two labels by default.
+- Every thing basically has underlying labels in Prometheus.
+- Labels or values enclosed in double underscore are Prometheus internal values.
+
+### Monitoring Containers Using Prometheus
+- Metrics can also be collected from containerized environments.
+- Docker engine metrics can also be extracted via configuring endpoint in `/etc/docker/daemon.json`.
+- `cAdvisor` is used to extract container metrics.
+
+### Monitoring Kubernetes Using Prometheus
+- Deploy into cluster itself (recommended).
+- Monitor applications running in Kubernetes.
+- Cluster itself can be monitored.
+  - Control plane components.
+  - Kubelet (cAdvisor)
+  - Kube-state-metrics (Kubernetes resources monitoring)
+  - Node-exporter on all nodes to monitor node resources.
+- Helm can be used to install Prometheus in Kubernetes cluster.
+- `kube-prometheus-stack` chart makes use of the Prometheus Operator.
+- A kubernetes operator is an application specific controller to manage instances of complex applications in Kubernetes.
+
+### Cloud Cost Management
+- Saving bills on cloud for the sake of efficiency is called `Cloud Cost Management`.
+
+### Application Delivery
+- 
