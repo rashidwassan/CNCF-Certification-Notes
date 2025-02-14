@@ -1,5 +1,8 @@
 # KCNA
 
+### Cloud Native
+- DevOps + Microservices + Cloud Native Open Standards + Containers.
+
 ### Cloud Native Computing Foundation (CNCF)
 - A project by Linux Foundation launched in 2015 to help advance container technology.
 - Independent organization from its parent.
@@ -20,7 +23,8 @@
 
 - `Etcd` is fully replicated in every master node.
 - Kube Api Server makes a master a master.
-- Kubelet makes a worker a worker.
+- Kubelet makes a worker a worker (however it is present on master too).
+![kubelet-arch](/images/kcna/kubelet-1.png)
 - Kubelet communicates to the master via API server.
 ### To get more info about cluster:
 ```bash 
@@ -372,6 +376,18 @@ kubectl config view
 - `Stability & Evolution:` API groups have multiple versions (v1, v1beta1) to ensure smooth transitions and backward compatibility.
 - `Discovery & Access:` Use kubectl api-resources and kubectl api-versions to explore available API groups and versions.
 
+### Jobs & CronJobs
+- A background job is a one-off task that is used to run a piece of code.
+- A job creates one or more Pods and will continue to retry execution of Pods until a specified number of them successfully terminate.
+- **Running a job**
+```bash
+kubectl create job hello --image=busybox -- echo "hello"
+```
+- A `CronJob` is a job running at a repeated schedule.
+```bash
+kubectl create cronjob hello --image=busybox --schedule="*/1 * * * *" -- echo "hello"
+```
+
 ### Authorization in Kubernetes
 - Node: like kubelet talks to the APIServer.
 - Attribute-Based Access Control (ABAC): Like proividing an individual with necessary permissions, defined in a policy object.
@@ -533,6 +549,13 @@ kubectl config view --kubeconfig=my-config
 - This is where CNI Plugins come into the picture, they provide the implementation of the same requirement by Kuberentes.
 
 ### Services in Kubernetes
+- Services load balance the requests to pods.
+- Services use `endpoints` to connect to pods.
+- `Endpoints` are just pool of IP addresses of pods associated to that service using labels and selectors.
+- `Endpoint slices:` Endpoints are broken into manageable units, each endpoint slice has a limit of 100 pods.
+```bash
+kubectl get endpoints
+```
 - `NodePort:` Makes pod's particular port exposed on all nodes in the cluster. The service can be used by accessing any of node's IPs and the port exposed by the container.
 - `ClusterIP:` Makes pods accessible inside the cluster.
 - `LoadBalancer:` Works with load balancers already configured. It uses those load balancers to distribute traffic.
@@ -673,5 +696,87 @@ On the other hand, `exporters` are used on targets so that Prometheus can pull m
 ### Cloud Cost Management
 - Saving bills on cloud for the sake of efficiency is called `Cloud Cost Management`.
 
-### Application Delivery
-- 
+### Fission
+- Fission is an open-source, Kubernetes-native serverless framework that simplifies the deployment of functions and applications on Kubernetes.
+
+### Cilium
+- eBPF-based Networking, Security, and Observability.
+- eBPF is a technology that can run programs in a privileged context such as the operating system kernel.
+
+### Calico
+- Open-source network and network security solution for containers, VMs, native host-based workloads.
+- Calico can perfrom better than alternatives like Flannel, Cilium, and Weavenet.
+
+### CNCF Projects
+- `ArgoCD:` Kubernetes-native tools to run workflows, manage clusters, and do GitOps right. ArgoCD detects changes in Git repository and updates resources in the cluster accordingly.
+- `Cert Manager:` Automatically provision and manage TLS certificates in Kubernetes.
+- `CRI-O:` Open Container Initiative-based implementation of Kubernetes Container Runtime Interface.
+- CNCF Jaeger, a Distributed Tracing Platform.
+
+### In-Tree vs Out-of-Tree
+- In-Tree: Internal Plugins, provided by default.
+- Out-of-Tree: External Plugins, manually installed.
+
+### Kubernetes Dashboard
+- Open-source application you can deploy to your cluster to provide a UI to view K8s components.
+
+### Management Layers
+- Allow to run Kubernetes on other platforms or allows to extend your control plane to multiple platforms.
+  - Weave Kubernetes Platform
+  - VMware Tanzu
+  - Azure Arc - multi-cluster-management.
+  - Google Anthos - Is GKE being extended to manage clusters deployed to VMs.
+
+### Red Hat OpenShift
+- Platform as a service for Kubernetes.
+- Open Shift is Kubernetes with a commercial platform by Red Hat built on top.
+- Kubectl is extended with additional functionality with OC CLI.
+- Quickly deploy local code to a remote OpenShift cluster via odo.
+- Fixing critical bugs than waiting for next Kubernetes release.
+- Uses Red Hat Core OS (an OS that is optimized for running containers).
+- One click-marketplace.
+- Graphical UI developer console.
+
+### Rancher Kubernetes Engine (RKE)
+- Runs entirely within Docker containers.
+- Works on bare metal & virtualized Servers.
+- RKE solves the problem of installation complexity.
+- Installation operation of Kubernetes is simplified.
+- Entirely independent of operating system and platform you are running.
+- As long as you can run supported version of Docker, you can run Kubernetes with RKE.
+
+### Kubernetes & Etcd Backup
+- Etcd is a strongly consistent, distributed key-value store that provides a reliable way to store data that needs to be accessed by a distributed system or cluster of machines.
+- Etcd resides in `control plane node(s)`.
+- Kubernetes resources are stored in an etcd (but could be backed by MariaDB)
+- Application data is stored in persistent volumes in cluster.
+
+### MinIO & Rook
+- Rook turns distributed storage systems into self-managing, self-scaling, self-healing storage services.
+- MinIO proivdes high-performance, `S3 Compatible Object Storage`. Native to Kubernetes.
+
+### Kubernetes ConfigMaps
+- A ConfigMap is an API Object used to store non-confidential data in key-value pairs for pods.
+- Pods can consume configmaps as:
+  - Environment variables
+  - Command-line arguments
+  - Configuration files in a volume
+
+### BusyBox
+- **BusyBox** combines tiny versions of many common UNIX utilities into a single small executable.
+- There are over 300 commands that are supported by BusyBox.
+
+### Probes in Kubernetes
+- Liveness Probe - when to restart container (in case it is not responding).
+- Readiness Probe - check when a container is ready to accept traffic.
+- Startup Probe - when a container application has started.
+
+### Netfilter
+- Solution for NAPT, network address and port translation and firewalling.
+
+### IP Tables
+- `Userspace:` Virtually, linux divides memory in two sections, kernel space (privileged) and user space to run tasks accordingly into their respective memory space.
+- `IP Tables:` User space utility-program that allows an administrator to configure the IP packet filter rules of the Linux kernel firewall.
+- IP Tables are simply virtual firewalls on Linux.
+
+
