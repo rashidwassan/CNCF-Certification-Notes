@@ -779,4 +779,18 @@ On the other hand, `exporters` are used on targets so that Prometheus can pull m
 - `IP Tables:` User space utility-program that allows an administrator to configure the IP packet filter rules of the Linux kernel firewall.
 - IP Tables are simply virtual firewalls on Linux.
 
+### CNCF - End User Technology Radar
+- Opinionated guide to a set of emerging technologies.
+- Intended for a technical audience.
+  - Assess
+  - Trial
+  - Adopt
 
+### Knative
+- Kubernetes-based platform to deploy and manage modern serverless workloads.
+- Knative is a project to create a standard set of building blocks for Kubernetes to enable serverless deployment patterns.
+- Does not offer FaaS at the moment.
+
+### Open Telemetry
+- Open Telemetry (OTEL) is a collection of open-source tools, APIs, and SDKs to instrument, generate, collect, and export telemetry data.
+- Open Telemetry standardizes the way telemetry data (metrics, logs, and traces) are generated and collected.
