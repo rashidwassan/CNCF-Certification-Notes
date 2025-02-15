@@ -137,7 +137,7 @@ spec:
 
 ```
 - Adding No Schedule taint on a node having running pods will cause pods with no supported tolerations to evict.
-- There are changes of a pod having matching tolerations get scheduled to another node as taints only make nodes to only schedule pods with matching tolerations.
+- There are chances of a pod having matching tolerations get scheduled to another node as taints only make nodes to only schedule pods with matching tolerations.
 - To find taints on master node:
 ``` bash
     kubectl describe node kubemaster | grep Taint
