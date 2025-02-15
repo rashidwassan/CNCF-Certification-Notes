@@ -537,7 +537,7 @@ kubectl config view --kubeconfig=my-config
 - Required ports must be open on respective nodes, like 6443 for API Server on master.
 - Port 10250 for kubelet, 10259 for kube-scheduler, 2379 for etcd, and 10257 for kube-controller-manager must be open.
 - Another port 2380 should also be open so that etcd clients can communicate with each other.
-- Worker nodes expose services on ports ranging between 30000-32767.
+- Worker nodes expose services (providing stable Virtual IPs to pods) on ports ranging between 30000-32767.
 - **PORTS GUIDE**
 ![portsinfo](/images/kcna/ports-k8s.png)
 
@@ -794,3 +794,50 @@ On the other hand, `exporters` are used on targets so that Prometheus can pull m
 ### Open Telemetry
 - Open Telemetry (OTEL) is a collection of open-source tools, APIs, and SDKs to instrument, generate, collect, and export telemetry data.
 - Open Telemetry standardizes the way telemetry data (metrics, logs, and traces) are generated and collected.
+
+
+## Some Questions
+
+### A CronJob is scheduled to run by a user every one hour. What happens in the cluster when it's time for this CronJob to run?
+- CronJob controller component creates a Job. Then the Job controller creates a Pod and waits until it finishes to run.
+
+### What is the default value for authorization-mode in Kubernetes API server?
+- --authorization-mode=AlwaysAllow
+
+### Let's assume that an organization needs to process large amounts of data in bursts, on a cloud-based Kubernetes cluster. For instance: each Monday morning, they need to run a batch of 1000 compute jobs of 1 hour each, and these jobs must be completed by Monday night. What's going to be the most cost-effective method?
+- Leverage the Kubernetes Cluster Autoscaler to automatically start and stop nodes as they're needed.
+
+### What is a Kubernetes service with no cluster IP address called?
+- Headless Service
+
+### What function does kube-proxy provide to a cluster?
+- Forwarding data to the correct endpoints for Services.
+
+### How long should a stable API element in Kubernetes be supported (at minimum) after deprecation?
+- 12 Months
+
+### What is the name of the lightweight Kubernetes distribution built for IoT and edge computing?
+- K3s
+
+### In a cloud native world, what does the IaC abbreviation stands for?
+- Infrastructure as Code
+
+### Which of the following workload require a headless service while deploying into the namespace?
+- StatefulSet
+
+### Which is the correct kubectl command to display logs in real time?
+```bash
+kubectl logs -f test-container-1
+```
+### How to load and generate data required before the Pod startup?
+- Use an init container with shared file storage.
+
+### What is the core functionality of GitOps tools like Argo CD and Flux?
+- They continuously compare the desired state in Git with the actual production state and notify or act upon differences.
+
+### We can extend the Kubernetes API with Kubernetes API Aggregation Layer and CRDs. What is CRD?
+- Custom Resource Definition
+
+### Which group of container runtimes provides additional sandboxed isolation and elevated security?
+- runsc, kata
+
