@@ -62,6 +62,27 @@
 - **Performance Monitoring:** Sysdig provides deep insights into containerized environments.
 
 
+## Kubernetes Cluster Component Security
+
+### API Server
+- Authentication and Authorization.
+
+### Kubernetes Controller Manager and Scheduler
+- Should be run on the separated, isolated node from where the applications are running.
+- Managing permissions using RBAC, to restrict these components to certain permissions only.
+- Using TLS communication between components for communication.
+- Implement auditlogging to these components using tools like Prometheus and Grafana.
+
+### Securing Kubelet
+- Kubeadm does not install Kubelet by default.
+- By default, you can do anonymous curl on Kube API Server to check the existing pods.
+- There are two ports:
+  - 10250 - Serves API that allows full access.
+  - 10255 - Serves API that allows unauthenticated read-only access.
+- This default anonymous access flag can be
+
+
+
 ## Multiple Choice Questions (MCQs)
 
 ---
