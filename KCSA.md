@@ -79,8 +79,77 @@
 - There are two ports:
   - 10250 - Serves API that allows full access.
   - 10255 - Serves API that allows unauthenticated read-only access.
-- This default anonymous access flag can be
+- This default anonymous access flag (--anonymous-auth) can be set to false. Either in commandline or `kubelet-config.yaml` file.
+- Certificates or API bearer tokens can be used by specifying them in commandline when starting kubelet service.
+- 
 
+
+### DUMPS:
+**Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
+- Code: Implement TLS, limit port ranges, manage third-party dependencies, and apply static and dynamic code analysis.
+
+**Security Controls & Frameworks:**
+- STRIDE: Spoofing, Tampering, Repudiation, Information, Disclosure, Denial of Servcie, Elevation of Privilege.
+- Standards & Frameworks: CIS Benchmarks, NIST, CSA, MITRE, ATT&CK, OCTAVE.
+
+**Isolation Techniques:**
+- **Namespace:** Ensure process isolation.
+- **Network Policies:** Apply Ingress and Egress rules.
+- **Policy Enforcement:** Prevent unauthorized actions.
+- **RBAC (Role-Based Access Control):** Manage authentication and permissions effectively.
+
+**Workload and Application Code Security:**
+- **Workload Security:** Focus on securing the platform and monitoring using tools like `sysdig`.
+- **Application Security:** Ensure the code in container images is secure by conducting vulnerability scans. Use automated security tools, enforce RBAC policies, and grant only necessary permissions to containers.
+- Tools like `Kube-bench` can enforce security best practices within Kubernetes, including configuring appropriate security contexts.
+
+### Security Principles:
+- `Security by Design:` Security should be a design requirement from the start.
+- `Secure Configuration:` Secure configurations should offer the best user experience.
+- `Informed Choices:` Selecting insecure configurations should be a deliberate and informed choice.
+- `Transition to Security:` The system should enable transitioning from insecure to secure states smoothly.
+- `Secure Defaults:` Defaults should protect against common vulnerabilities and exploits.
+- `Support for Exceptions:` Exceptions to secure configurations should be supported at a high level.
+- `Defend Against Exploits:` Secure defaults should defend against widespread vulnerability exploits.
+- `Understandable Security Limitations:` The security limitations of any system should be clear and explainable.
+
+### Compliance Frameworks
+- **CIS Benchmarks:** Security configuration benchmarks for Kubernetes clusters.
+- **NVD (National Vulnerability Database):** A database of known vulnerabilities and exposures.
+- **NIST (National Institute of Standards and Technology):** A key resource for security standards and best practices.
+
+
+### Supply Chain Compliance
+- Use CNCF Supply Chain Security.
+  - **Artifacts:** Track software components.
+  - **Metadata:** Record information about artifacts.
+  - **Attestations:** Verify compliance.
+  - **Policies:** Apply compliance checks to ensure security throughout the supply chain.
+
+
+### Threat Intelligence:
+- **Threat Intelligence:** Gathering indications of specific behaviours of potential attackers.
+- **MITRE ATT&CK Framwork:** act as starting point to understand tricks and techniques of attackers.
+
+### Develop -> Distribute -> Deploy -> Runtime
+- Security risk management process that spans the development, distribution, deployment, and runtime phases of software lifecycle.
+
+### Automation and Tooling:
+- **Kubescape:** Scans everything - clusters, pods, and manifests - against CIS benchmarks.
+- **Kube-bench:** Focuses on scanning clusters for CIS compliance.
+- **Checkov:** Performs static analysis on manifests and checks for security threats.
+
+### OCTAVE (Operationally Critical Threat, Asset, and Vulnerability Evaluation) threat modeling framework:
+- Risk assessment methodology to identify and prioritize information security risks.
+- It consists of three phases:
+  - **Phase 1:** Identification of critical assets and threats to the system.
+  - **Phase 2:** Assessment of vulnerabilities in the infrastructure.
+  - **Phase 3:** Development of a security strategy and implementation plan to mitigate identified risks.
+
+- **General Threat Actors:**
+  - Malicious Insider.
+  - Uninformed Insider.
+  - Malicious Insider.
 
 
 ## Multiple Choice Questions (MCQs)
