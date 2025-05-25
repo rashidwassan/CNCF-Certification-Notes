@@ -81,7 +81,42 @@
   - 10255 - Serves API that allows unauthenticated read-only access.
 - This default anonymous access flag (--anonymous-auth) can be set to false. Either in commandline or `kubelet-config.yaml` file.
 - Certificates or API bearer tokens can be used by specifying them in commandline when starting kubelet service.
-- 
+
+### Container Runtime Security
+- Early Docker allowed to run with the root access on the host machine.
+- **Container Vulnerabilities:**
+  - Dirty Cow - Linux Kernel, allowed containers to get unauthorized root access.
+  - RunC Container Breakout - Docker, Kubernetes etc, allowed attackers to rewrite the RunC functionality to gain root access.
+  - Docker Container Escape - Docker
+  - Containerd DoS vunerability
+  - CRI-O Container Escape
+- **Mitigations:**
+  - Regular updates and patching.
+  - Use package manager to update runtime.
+  - Running containers with least priveleges.
+    - This setting can be managed in pod manifest file under `spec->securityContext` field.
+  - Use read only root file system for containers.
+    - `spec->securityContext->readOnlyRootFileSystem: true`.
+  - Limit resource usages.
+  - Use security profiles.
+    - Configure SELinux
+    - Apply AppArmor profiles using Kubernets annotations.
+  - Transitioning to supported runtimes.
+  - Implementing logging and monitoring. Use tools like Fluentd, Logstash, and Prometheus for centralized logging and monitoring.
+
+### Securing Kube-Proxy:
+- Locate Kubeconfig file using:
+``` bash
+ps -ef | grep kube-proxy
+```
+- This command will give you the location of the kube proxy configuration file.
+- In kube proxy config file, there will a reference to the kube config file. This is the config file that kube proxy uses to communicate with the API server.
+- Check config file permissions to be set to 644 or stricter.
+- Verify this file is owned by root.
+- Secure the communication between kube proxy and API server.
+  - Certificate and auth token is used in TLS communication between kube proxy and API server.
+- Make sure audit logs are enabled.
+
 
 
 ### DUMPS:
