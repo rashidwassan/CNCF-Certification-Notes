@@ -118,6 +118,9 @@
 - **CIS Benchmarks:** Security configuration benchmarks for Kubernetes clusters.
 - **NVD (National Vulnerability Database):** A database of known vulnerabilities and exposures.
 - **NIST (National Institute of Standards and Technology):** A key resource for security standards and best practices.
+- **GDPR (General Data Protection Regulation):** By European Union, about user data and its encryption
+- **HIPAA (Health Insurance Portability and Accountability Act):** US regulation for patient health data.
+- PCI DSS
 
 ### Threat Modeling Frameworks:
 - Defines how to do it.
