@@ -114,17 +114,24 @@
 - `Understandable Security Limitations:` The security limitations of any system should be clear and explainable.
 
 ### Compliance Frameworks
+- Defines what to do.
 - **CIS Benchmarks:** Security configuration benchmarks for Kubernetes clusters.
 - **NVD (National Vulnerability Database):** A database of known vulnerabilities and exposures.
 - **NIST (National Institute of Standards and Technology):** A key resource for security standards and best practices.
 
+### Threat Modeling Frameworks:
+- Defines how to do it.
+- **STRIDE:** Developed by Microsoft.
+- **MITRE ATT&CK:** Deals with tactics and techniques.
+
 
 ### Supply Chain Compliance
+- Make sure the external components used are verified and trusted.
 - Use CNCF Supply Chain Security.
-  - **Artifacts:** Track software components.
-  - **Metadata:** Record information about artifacts.
-  - **Attestations:** Verify compliance.
-  - **Policies:** Apply compliance checks to ensure security throughout the supply chain.
+  - **Artifacts:** Track software components. Keyless signing using tools like `CoSign` to detect tampering in future.
+  - **Metadata:** Record information about artifacts. SBOM (Software Bill of Materials), includes components, dependencies, and libraries. It is a file that can be downloaded to verify the integrity of the components of an application.
+  - **Attestations:** Verify compliance. Makes sure the data is sent by the authentic source, tools like `in-toto` are used for this.
+  - **Policies:** Apply compliance checks to ensure security throughout the supply chain. `policy-controller` for policy enforcement.
 
 
 ### Threat Intelligence:
@@ -135,9 +142,27 @@
 - Security risk management process that spans the development, distribution, deployment, and runtime phases of software lifecycle.
 
 ### Automation and Tooling:
+- Cloud Native Security Whitepaper
+- **Google OSS-Fuzz:** Check Open-Source software bugs and vulenarabilities using fuzz testing.
+- **Snyk Code:** VS Code extension.
+- **Fabric8 by RedHat:** VS Code extension for IDE based code analysis.
+- **KubeLinter:** Checks syntax of manifests.
+- **KubeSec:** Scans for vulnerabilites in YAML files.
+- **Terrascan:** Works for K8s as well IaC in general for vulnerabilities and compliance issues.
+- **Image Scanning:** Nuclei, Trivy, Snyk, Clair, Grype.
+- **Signing & Trust:** In-toto, Notation, TUF, Sigstore.
+- **Preflight Checks:** Gatekeeper (policy management using YAML), Kyverno, 
+- **Observability:** Prometheus, Grafana, Elastic, OpenTelemetry.
+- **Response and Mitigation:** Wazuh (Security monitoring and intrusion detection), Snort, Zeek (Network security monitoring).
 - **Kubescape:** Scans everything - clusters, pods, and manifests - against CIS benchmarks.
 - **Kube-bench:** Focuses on scanning clusters for CIS compliance.
+- **Orchestration:** Trivy, Kube-Bench, Falco, Spiffe (Facilitates identity management).
+- **Service Mesh:** Istio, Linkerd.
+- **Storage:** Rook, CEPH, Gluster.
+- **Acess:** KeyCloak, Teleport, HashiCorp Vault.
 - **Checkov:** Performs static analysis on manifests and checks for security threats.
+
+![alt text](images/kcsa/kcsa-automation-tooling.png)
 
 ### OCTAVE (Operationally Critical Threat, Asset, and Vulnerability Evaluation) threat modeling framework:
 - Risk assessment methodology to identify and prioritize information security risks.
@@ -194,3 +219,23 @@ A company has migrated its services to a public cloud provider. They need to ens
 When migrating services to a public cloud provider, the customer is responsible for configuring network security groups and firewalls for their virtual machines to ensure proper security.
 
 ---
+
+### 4. **Question**
+
+Scenario: A user disputes a financial transaction, claiming they never authorized it. You need a way to verify the legitimacy of the transaction.
+**Which STRIDE category is relevant here, and what solution can help address this issue?**
+
+### ✅ **Answer:**
+
+**Repudiation**
+
+---
+
+### 5. **Question**
+
+Scenario: You are required to automate compliance checks and generate audit reports.
+**Which tools are appropriate for this purpose?**
+
+### ✅ **Answer:**
+
+**Chef InSpec and OpenSCAP**
