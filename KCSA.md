@@ -117,7 +117,48 @@ ps -ef | grep kube-proxy
   - Certificate and auth token is used in TLS communication between kube proxy and API server.
 - Make sure audit logs are enabled.
 
+### Securing the Pod
+- The `spec->containers->securityContext->privileged` property should be set to false.
+- Setting volume mounts to use hostpath can also be prone to attacks.
+- We can implement policies to restrict users from creating pods with certian configurations.
+- Policiy implementation was done using Pod Security Policy before, now it is done using Pod `Security Admission (PSA)` + `Pod Security Standards`.
+- If a security policy is enabled, Admission Controllers validate the pod creation requests according to a preconfigured rule, if a request does not comply rules, it gets rejected.
+- To enable it, we need to add `--enable-admission-plugins=PodSecurityPolicy` in our kube-apiserver service commandline arguments.
+- Pod Security Policies are configured in YAMLs
+- **Pod Security Admission:** 
+  - Admission controller built-in to Kubernetes enforces Pod Security Standards.
+  - **Enforce Mode:** Pods violating the policy are rejected.
+  - **Audit Mode:** Pods violating the policy are allowed but recorded for auditing purposes.
+  - **Warn Mode:** Pods violating the policy are allowed but generate warnings to alert users.
+- **Authentication:**
+  - Use *OpenID Connect* for authentication.
 
+### Securing ETCD:
+- ETCD is a key-value store that contains cluster configuration data, secrets and state information, certificates and keys.
+- Encryption configuraion file needs to be created to encrypt ETCD data at rest.
+- This encryption configuration then needs to be added in the `etc/kubernetes/manifests/etcd.yaml` under command `--encryption-provider-config=<configpath to yaml file>`.
+- Using TLS for data in transit, to and from ETCD.
+- Regular ETCD data backups using built-in snapshot functionality.
+
+### Securing Container Networking
+- Implementing network policies to change defualt behavior of Kubernetes of allowing every pod to access another pod.
+- Using service meshes to implement Mutual TLS Traffic Management Observability.
+- For network layer data encrytion, Kubernetes uses IPSec and WireGuard.
+- Using namespaces to isolate networks.
+
+### Kubectl Client Security
+- Kubectl works with API Server.
+- Kubectl uses kube config file to access cluster using the API Server.
+- Kubectl can be in the master node, or outside of it.
+- Another way to access API Server directly using port 6443 using curl with necessary credentials.
+- Alternate way is to run Kubectl proxy service that uses the credentials from kube config files.
+- Applications using cluster IP service type are also accessible using this proxy via curl.
+- Kubectl port forward, allows to forward port from a laptop or computer to a service.
+
+### Kubeconfig Security
+- Defeault directory wehere kubectl reads the kube config from is `$HOME/.kube/config`.
+- Contains clusters, contexts, and users.
+- The kind of kube config is `Config`. 
 
 ### DUMPS:
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
