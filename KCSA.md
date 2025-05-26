@@ -126,12 +126,38 @@ ps -ef | grep kube-proxy
 - To enable it, we need to add `--enable-admission-plugins=PodSecurityPolicy` in our kube-apiserver service commandline arguments.
 - Pod Security Policies are configured in YAMLs
 - **Pod Security Admission:** 
-  - Admission controller built-in to Kubernetes enforces Pod Security Standards.
+  - Admission controller built-in to Kubernetes enforces Pod Security Standards. There are `three modes`:
   - **Enforce Mode:** Pods violating the policy are rejected.
   - **Audit Mode:** Pods violating the policy are allowed but recorded for auditing purposes.
   - **Warn Mode:** Pods violating the policy are allowed but generate warnings to alert users.
+- There are `three profiles` are defined in PSA
+  - Priveleged.
+  - Baseline.
+  - Restricted.
+- These profiles can be applied with any mode at namespace level.
+
+**For example:**
+``` bash
+kubectl label ns default pod-security.kubernetes.io/enforce=baseline
+```
 - **Authentication:**
   - Use *OpenID Connect* for authentication.
+
+### Authentication
+- You cannot directly create users in Kubernetes, for that, external tools are used. However, service accounts are a built-in functionality in Kubernetes.
+- **Authenticattion Mechanisms:**
+  - Static password file (not recommended).
+  - Static token file.
+  - Certificates.
+  - Identity services.
+- **Authorization Mechanisms in Kuberenetes:**
+  - Node based authorization.
+  - Role-based authorization.
+    - rbac.authorization.k8s.io/v1, kind: Role.
+    - There are `three rules for each role`: apiGroups, resources, verbs.
+  - Attribute-based authorization.
+  - Webhook.
+
 
 ### Securing ETCD:
 - ETCD is a key-value store that contains cluster configuration data, secrets and state information, certificates and keys.
@@ -159,6 +185,12 @@ ps -ef | grep kube-proxy
 - Defeault directory wehere kubectl reads the kube config from is `$HOME/.kube/config`.
 - Contains clusters, contexts, and users.
 - The kind of kube config is `Config`. 
+
+### Securing Storage
+- If storage supports native encryption, enabling encryption property in storage class will facilitate this encryption of data stored.
+- Implementing access controls like read only access to users via roles.
+- Implementing backups and disaster recovery with tools like velero, portworx, OpenEBS, Veeam Kasten.
+- Monitoring and auditing.
 
 ### DUMPS:
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
