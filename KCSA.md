@@ -157,6 +157,8 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
     - There are `three rules for each role`: apiGroups, resources, verbs.
   - Attribute-based authorization.
   - Webhook.
+- `kube auth can-i` command can be used to check access level to the cluster.
+- 
 
 
 ### Securing ETCD:
@@ -191,6 +193,35 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
 - Implementing access controls like read only access to users via roles.
 - Implementing backups and disaster recovery with tools like velero, portworx, OpenEBS, Veeam Kasten.
 - Monitoring and auditing.
+
+### Segmentation & Isolation
+- Default Namespaces Created upon Cluster Creation:
+  - Kube-system
+  - Default
+  - Kube-public
+- Resources within the same namespace can access each other with name.
+- Resources in different namespaces should access each other with reference like a pod in default namespace can access a service service1 like: `service1.namespace.svc.cluster.local`. Namespace here is the name of the namespace.
+
+### Auditlogging
+- Auditing is built-into Kubernetes, and facilitated by the API Server.
+- **Events Recorded by API Server upon a User Request:**
+  - 1. RequestReceived.
+  - 2. ResponseStarted.
+  - 3. ResponseComplete.
+  - 4. Panic (in case of errors)
+- An audit policy is created to customize auditing by specifying auditing rules.
+  - apiVersion: audit.k8s.io/v1
+  - kind: Policy
+  - omitStages:
+  - rules:
+
+### Kubernetes Threat Modeling
+- **Threat Modeling:** Helps in finding potential threats and understand their impact.
+- **Kubernetes Trust Boundaries:**
+  - Clusters
+  - Nodes
+  - Pod boundaries
+  - Container boundary
 
 ### DUMPS:
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
