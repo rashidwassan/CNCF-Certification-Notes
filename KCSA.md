@@ -223,6 +223,41 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
   - Pod boundaries
   - Container boundary
 
+- **Persistence:**
+  - The ability of an attacker to retain the system under control.
+  - Foothold with container restarts.
+  - Foothold with container/pod reboots.
+  - Foothold with resiliance to node reboots.
+  - Foothold wth resilaiance to node re-cycling.
+- **Mitigating persistence risks:** RBAC for users and service accounts, secret management, hardening pod security, regular updates and patching.
+
+- **Deinal of Service:**
+  - *Attack Vectors for DoS:*
+    - Add process to a running pod to overwhelm it.
+    - Use priveleged container to modify content on the host or start a process on host.
+    - Write new workloads on backend, i.e more workload on etcd to overwhelm cluster.
+    - Create scale deployment using API server.
+  - *Potential Attack Techniques:*
+    - Exhaust compute resources.
+      - Reduce worker node pool.
+        - Bring down the kubelet.
+        - Render kubelet healthcheck unresponsive.
+    - Disrupt, renew, or restarting scheduling of workloads.
+      - Prevent changes to desired cluster state.
+      - Bring scheduler down.
+      - Bring controller manager down.
+    - Disrupt networking.
+      - Bring kube proxy down.
+      - Degrade CLI overlay network.
+
+- **Mitigating Denial of Service Attacks:**
+  - Set resource limits and requests at pod level.
+  - Define resource quotas for namespaces.
+  - Limit permissions assigned to service accounts.
+  - Limit access of API Server to selected IPs.
+  - Use logging and monitoring.
+
+
 ### DUMPS:
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
 - Code: Implement TLS, limit port ranges, manage third-party dependencies, and apply static and dynamic code analysis.
