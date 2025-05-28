@@ -158,7 +158,6 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
   - Attribute-based authorization.
   - Webhook.
 - `kube auth can-i` command can be used to check access level to the cluster.
-- 
 
 
 ### Securing ETCD:
@@ -257,6 +256,14 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
   - Limit access of API Server to selected IPs.
   - Use logging and monitoring.
 
+- **Malicious Code Execution:**
+  - Poisoning the image repository.
+
+- **Mitigating Malicious Code Execution:**
+  - Scanning vulnerarabilies in images.
+  - Applying patches.
+  - Secure image pull secrets.
+  - Use signed images.
 
 ### DUMPS:
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
@@ -416,3 +423,36 @@ Scenario: You are required to automate compliance checks and generate audit repo
 ### ✅ **Answer:**
 
 **Chef InSpec and OpenSCAP**
+
+---
+
+### 6. **Question**
+
+Scenario: A company wants to detect and respond to unauthorized or suspicious activities in their Kubernetes cluster.
+**What should be included as part of their monitoring and auditing strategy?**
+
+### ✅ **Answer:**
+
+**Enabling audit logging for the Kubernetes API and monitoring access to secrets**
+
+---
+
+### 7. **Question**
+
+Scenario: An online retailer needs to prevent unauthorized access to Kubernetes management components.
+**What is the best measure they should implement?**
+
+### ✅ **Answer:**
+
+**Binding etcd to localhost**
+
+---
+
+### 7. **Question**
+
+Scenario: A logistics company is concerned about SQL injection attacks on their backend API services.
+**What best practice should they adopt to mitigate this risk?**
+
+### ✅ **Answer:**
+
+**Using prepared statements and parameterized queries**
