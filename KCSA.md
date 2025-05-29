@@ -306,8 +306,30 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
       - Priority: WARNING
   ```
 
+- **Services Meshes:**
+  - Service meshes help mitigate issues with repitition in network and auth config for different microservices in a central manner.
+  - Istio uses Envoy proxy. And control plane of Istio uses Istiod.
+  - Istio provides Encryption, Mutual TLS, Audit Logs.
+  - Istio also provides certificate management system.
+
+### PKI for K8s
+- **Generating a Certificate:**
+  - 1. Generate keys `openssl genrsa -out ca.key 2048`.
+  - 2. Generate certificate signing request: `openssl req -new -key -subj "/CN=KUBERNETES-CA" -out ca.csr`.
+  - 3. Sign certificate: `openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt`
+  - 4. Now we will have private key and root certificate that will be used to create new certificates.
+  - Now, new certificates will be signed using this CA certificate, those certificates will be used for users and clients, and kubernetes components.
+  - After creating a client certificated that is signed using CA certificate, pass that along with the key when launcing components, like etcd for example. Key and certificate will be passed into the commandline arguments.
+  - Specified name for the particular component should be mentioned in the certificate.
+  - These things can be passed as a configuration in form of .cnf file to the certificate signing request creation command.
+  - Nodes too, are required to have their own certificates. Those certificate should be added SYSTEM:NODES group.
+- Kubeadm automatically creates and manages certificates. However, if manually configured, the cluster needs explicit set up and creation of those certificates.
+
 
 ### DUMPS:
+
+- Set --profiling, and --enable-profiling flags to false in scheduler to reduce attack surface.
+
 **Cloud Native Security Layers:** Cloud -> Clusters -> Containers -> Code.
 - Code: Implement TLS, limit port ranges, manage third-party dependencies, and apply static and dynamic code analysis.
 
