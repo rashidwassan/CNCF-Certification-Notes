@@ -399,7 +399,7 @@ kubectl label ns default pod-security.kubernetes.io/enforce=baseline
 - **Terrascan:** Works for K8s as well IaC in general for vulnerabilities and compliance issues.
 - **Image Scanning:** Nuclei, Trivy, Snyk, Clair, Grype.
 - **Signing & Trust:** In-toto, Notation, TUF, Sigstore.
-- **Preflight Checks:** Gatekeeper (policy management using YAML), Kyverno, 
+- **Preflight Checks:** Gatekeeper (policy management using YAML), `Kyverno`.
 - **Observability:** Prometheus, Grafana, Elastic, OpenTelemetry.
 - **Response and Mitigation:** Wazuh (Security monitoring and intrusion detection), Snort, Zeek (Network security monitoring).
 - **Kubescape:** Scans everything - clusters, pods, and manifests - against CIS benchmarks.
@@ -520,3 +520,105 @@ Scenario: A logistics company is concerned about SQL injection attacks on their 
 ### ✅ **Answer:**
 
 **Using prepared statements and parameterized queries**
+
+-------------------------------
+
+- What is the primary difference between MicroVM and User-Space Kernel approaches in cloud native security?
+  - User-space kernels intercept system calls in user space
+
+- Which Kubernetes resource is used to enforce Pod Security Standards within a namespace?
+  - Pod Security Admission Controller
+
+- Which of the following are best practices for securing etcd in a Kubernetes cluster? (Select all that apply)
+  - Enable TLS encryption for all communication with etcd
+  - Limit access to etcd endpoints to trusted networks only
+  - Use authentication and authorization mechanisms for etcd access
+  - Store etcd backups in a secure and access-controlled location
+
+- Which Kubernetes or related object defines how to build and deploy an application from source code?
+  - BuildConfig (OpenShift)
+
+- In Kubernetes NetworkPolicy configuration, what podSelector configuration creates a default-deny-all policy that applies to all pods in a namespace?
+  - Empty selector: {}
+> Empty pod selector selectors selects all pods in the namespace.
+
+- Which guidance document provides best practices for mitigating supply chain risks in Kubernetes environments?
+  - NSA/CISA Kubernetes Hardening Guidance
+
+- Which of the following restrictions does the 'baseline' Pod Security Standard enforce (Disallow Context)? (Select all that apply)
+  - Privileged containers (securityContext.privileged: true)
+  - Host networking (hostNetwork: true)
+  - Host PID namespace (hostPID: true)
+  - Host IPC namespace (hostIPC: true)
+  - HostPath volumes
+  - Adding dangerous Linux capabilities (e.g., NET_RAW, SYS_ADMIN)
+  - allowPrivilegeEscalation: true
+  - procMount: Unmasked
+  - Unsafe volume types (e.g., nfs, cifs, flocker, gitRepo, etc.)
+
+- Which Kubernetes resources, if compromised, could lead to significant security breaches and should be audited carefully? (Select all that apply)
+  - Secrets, ServiceAccounts
+
+- Can you enforce more than one Pod Security Admission (PSA) policy level concurrently within a single namespace?
+  - No, only one policy level per namespace
+
+- Which configuration in a Kubernetes container's securityContext is used to drop all Linux capabilities, effectively removing extra privileges?
+  - capabilities: {drop: ['ALL']}
+
+- Which tool is specifically designed to perform static security analysis of Kubernetes manifests to identify potential security issues?
+  - kubesec
+
+- In Kubernetes, which securityContext setting ensures that a container runs as a non-root user to enhance security?
+  - runAsNonRoot: true
+
+- Which methods can be used to isolate resources effectively in a multi-tenant Kubernetes environment? (Select all that apply)
+  - Deploying separate Kubernetes clusters for each tenant
+  - Using Kubernetes namespaces combined with Role-Based Access Control (RBAC)
+  - Applying Kubernetes Network Policies to restrict traffic
+
+- Which command is recommended to check the readiness and status of Kubernetes cluster components?
+  - kubectl get --raw='/readyz?verbose'
+
+- Which strace command attaches to an already running process with PID 1234 to trace its system calls?
+  - strace -p 1234
+
+- Which command calculates the SHA256 checksum of the file '/usr/bin/kubelet' on a Linux system?
+  - sha256sum /usr/bin/kubelet
+
+- In a Kubernetes NetworkPolicy specification, which field defines the allowed egress destinations for Pods?
+  - Egress
+
+- Which field in the Pod spec can you use to disable privilege escalation for all containers in the Pod?
+  - spec.containers.securityContext.allowPrivilegeEscalation: false
+
+- Which of the following are critical security hardening measures for the Kubernetes API server? (Select all that apply)
+  - Disable anonymous authentication
+  - Enable RBAC authorization
+  - Enable etcd encryption for secrets
+
+- How do you configure a Kubernetes audit policy rule to log events for all resources within a specific namespace?
+  - Use 'namespaces: ["<namespace>"]' under the rule's 'namespaces' field
+
+- Which of the following controllers is NOT managed by the kube-controller-manager in Kubernetes?
+  - Ingress Controller
+
+- What is the role of the 'namespaceSelector' field in a Kubernetes NetworkPolicy?
+  - To select Pods in specific namespaces for ingress or egress rules
+
+- Which Kubernetes admission controller runs first during the admission control process?
+  - MutatingAdmissionWebhook
+
+- Which of the following securityContext fields are commonly applied at the Pod level in Kubernetes? (Select all that apply)
+  - runAsUser, fsGroup, seLinuxOptions
+
+- How can you update the container image of a Kubernetes deployment without modifying other deployment configurations?
+  - Use the 'kubectl set image' command to update the image
+
+- To enable audit logging in Kubernetes, which flag must be added to the API server configuration to specify the log file path?
+  - --audit-log-path
+
+- Which command lists all processes currently listening on TCP and UDP ports on a Linux system, including the associated process IDs?
+  - sudo ps aux | grep LISTEN
+
+- Which kubectl command allows you to view the events occurring in a Kubernetes cluster, such as pod lifecycle changes and errors, using the most current recommended method?
+ - kubectl events
