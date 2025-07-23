@@ -139,7 +139,151 @@ volumes:
 
 > When secret is mounted as a volume, all keys are created as files in that volume with their values as content of those files.
 
+### Security Contexts:
+- Usage:
+```yaml
+spec:
+  containers:
+    securityContext:
+      runAsUser: 1000
+      capabilities:
+        add: ["MAC_ADMIN"] # only supported at pod level.
+```
 
+### Resource Requirements
+1. Requests and limits
+
+```yaml
+spec:
+  containers:
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: 1
+      limits:
+        memory: "2Gi"
+        cpu: 2
+```
+
+2. Limit ranges
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit
+spec:
+  limits:
+  - default
+      cpu: 500m 
+    defaultRequest:
+      cpu: 500m
+    max:
+      cpu: "1"
+    min:
+      cpu: 100m
+    type: container
+```
+
+### Service Accounts
+```bash
+kubectl create serviceaccount sa
+```
+- For Kubernetes 1.24 and later, you need to generate token manually:
+```bash
+kubectl create token sa
+```
+- Update service account for deployment:
+```bash
+kubectl set serviceaccount deploy/web-dashboard dashboard-saf
+```
+
+### Node Selectors
+```yaml
+spec:
+  containers:
+  nodeSelector:
+    size: Large
+```
+- Now let's label the node:
+```bash
+kubectl label nodes node1 size=Large
+```
+
+### Node Affinity
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-affinity-demo
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+            - node-1
+  containers:
+  - name: nginx
+    image: nginx
+```
+
+### Checking Node Labels
+```bash
+kubectl get nodes --show-labels
+```
+
+### Checking Taints on Nodes
+```bash
+k describe nodes nodename | grep -i taints
+```
+
+### Readiness Probe
+- Under Containers, on same level as container specs:
+```yaml
+readinessProbe:
+  httpGet:
+    path: /api/ready
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  failureThreshold: 8
+
+  # for TCP
+  tcpSocket:
+    port: 3306
+
+ # command verification
+  exec:
+    command:
+      - cat
+      - /app/is_ready
+```
+
+### Liveness Probe
+- Under Containers, on same level as container specs:
+```yaml
+containers:
+  - image: nginx
+  livenessProbe:
+    httpGet:
+      path: /api/healthy
+      port: 8080
+```
+
+### Container Logs from Multi Container Pods
+```bash
+kubectl logs pod1 containername
+```
+
+### Labels & Selectors
+- Listing pods having a certain label:
+```bash
+kubectl get pods --selector app=app1
+```
 
 ### Quick Notes:
 - Names and labels are children of metadata.
