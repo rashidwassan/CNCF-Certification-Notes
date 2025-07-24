@@ -339,6 +339,86 @@ helm pull -untar bitnami/apache
   - commonAnnotations
   - images:
 
+### Ingress
+
+
+### Volumes
+- HostPath
+```yaml
+spec:
+  containers:
+  -  image: alpine
+     volumeMounts:
+     - mountPath: /opt
+     - name: data-volume
+  volumes:
+  - name: data-volume
+    hostPath:
+      path: /data
+      type: Directory
+```
+
+### Persistent Volume
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  hostPath:
+    path: /tmp/data
+  
+  # Or Cloud:
+  awsElasticBlockStore:
+    volumeID: idhere
+    fsType: ext4
+```
+
+### Persistent Volume Claims
+- Administrators usually create Persistent Volumes.
+- Users create Persistent Volume Claims.
+- Every Persistent Volume Claim is bound to only one Persistent Volume.
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500mi
+```
+
+- Using PVC in Pod:
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+```
+
+
+### Exec into pod
+```bash
+kubectl exec podname -- command
+```
 
 ### Quick Notes:
 - Names and labels are children of metadata.
