@@ -285,10 +285,67 @@ kubectl logs pod1 containername
 kubectl get pods --selector app=app1
 ```
 
+### Services
+
+- NodePort
+```yaml
+apiVersion: V1
+kind: Service
+metadata:
+  name: serviceexp
+spec:
+  type: NodePort
+  ports:
+    - targetPort: 80
+      port: 80
+      nodePort: 30002
+  selector:
+    app: myapp
+    type: frontend
+```
+
+### Helm
+- To install on a linux host.
+```bash
+sudo snap install helm --classic
+```
+- Searching a chart:
+```bash
+helm search hub wordpress
+helm search repo name
+```
+- Adding chart from a repo in Helm
+```bash
+helm repo add name url
+```
+- Listing repos:
+```bash
+helm repo list
+```
+- Listing packages installed by helm:
+```bash
+helm list
+```
+- Downloading charts
+```bash
+helm pull -untar bitnami/apache
+```
+
+### Kustomize
+- Transformers:
+  - commonLabel
+  - namePrefix/Suffix
+  - Namespace
+  - commonAnnotations
+  - images:
+
+
 ### Quick Notes:
 - Names and labels are children of metadata.
 - Lables is a dictionary under metadata dictionary.
 - There can be any key or value literal in labels.
+- Blue Green Deployment: Create 2nd deployment, and then update reference in the corresponding service to route traffic to it.
+- Canary: Have two deployments, with canary one with less pods so that less traffic can be entertained by them.
 
 ### Must needed fields for pod:
 - apiVersion
