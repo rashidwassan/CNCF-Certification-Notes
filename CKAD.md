@@ -304,6 +304,27 @@ spec:
     type: frontend
 ```
 
+### Deployments
+- Imperative Commands:
+```bash
+kubectl create deployment my-deploy --image=nginx --replicas=3
+
+kubectl expose deployment my-deploy --port=80 --target-port=80 --type=ClusterIP
+
+# Scale to 5 replicas
+kubectl scale deployment my-deploy --replicas=5
+
+kubectl set image deployment/my-deploy nginx=nginx:1.21 --record
+
+kubectl rollout status deployment/my-deploy
+
+kubectl rollout history deployment/my-deploy
+
+kubectl rollout undo deployment/my-deploy
+
+kubectl rollout undo deployment/my-deploy --to-revision=2
+```
+
 ### Helm
 - To install on a linux host.
 ```bash
@@ -369,6 +390,7 @@ spec:
     - ReadWriteOnce
   capacity:
     storage: 1Gi
+  storageClassName: manual
   hostPath:
     path: /tmp/data
   
@@ -388,6 +410,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: my-claim
 spec:
+  storageClassName: manual 
   accessModes:
     - ReadWriteOnce
   resources:
@@ -397,10 +420,6 @@ spec:
 
 - Using PVC in Pod:
 ```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mypod
 spec:
   containers:
     - name: myfrontend
@@ -476,6 +495,74 @@ kubectl auth can-i delete nodes
 ----------------
 
 kubectl auth can-i create deployments --as dev-user [--namespace name]
+```
+
+### NetworkPolicy Example
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-specific-traffic
+  namespace: default  # Namespace where policy applies
+spec:
+  podSelector:
+    matchLabels:
+      role: backend   # Select Pods with label role=backend
+  policyTypes:
+    - Ingress
+    - Egress  # Policy applies to both Ingress and Egress traffic
+
+  # INGRESS RULES
+  ingress:
+    # 1. Allow traffic from Pods with label app=frontend in ANY namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              env: production
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 80    # Allow HTTP traffic
+        - protocol: TCP
+          port: 443   # Allow HTTPS traffic
+
+    # 2. Allow traffic from specific IP block (e.g., your internal network)
+    - from:
+        - ipBlock:
+            cidr: 10.0.0.0/24   # Allow this subnet
+            except:
+              - 10.0.0.128/25  # Block part of subnet
+      ports:
+        - protocol: TCP
+          port: 3306   # Allow MySQL DB traffic
+
+  # EGRESS RULES
+  egress:
+    # 1. Allow Pods to connect to DNS service in kube-system namespace
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53    # DNS over UDP
+        - protocol: TCP
+          port: 53    # DNS over TCP
+
+    # 2. Allow Pods to connect to an external IP range (e.g., Internet API)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0   # All IPs
+      ports:
+        - protocol: TCP
+          port: 443   # HTTPS only
+
+
 ```
 
 ### Quick Notes:
