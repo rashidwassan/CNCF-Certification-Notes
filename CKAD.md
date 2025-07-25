@@ -431,6 +431,8 @@ spec:
     - name: mypd
       persistentVolumeClaim:
         claimName: myclaim
+    - name: time-volume
+      emptyDir: {}
 ```
 
 
