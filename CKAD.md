@@ -420,6 +420,64 @@ spec:
 kubectl exec podname -- command
 ```
 
+### Security
+- All user access is managed by API Server.
+- Basic auth can be used to have .csv password file with: password,user,userID,(optional)group columns.
+- Then add `--basic-auth-file=file.csv` into exec params of kube API Server.
+- Or `--token-auth-file` is there are tokens instead of passwords in file.
+
+### Role
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "get", "create", "update", "delete"]
+
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["list", "get", "create"]
+```
+
+### Role Binding
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ex-rb
+
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: dev-user-role
+  apiGroup: rbac.authorization.k8s.io
+```
+
+### Role & RoleBinding IMPERATIVE
+```bash
+kubectl create role developer --verb=get,create,... --resource=pods,deployments
+
+kubectl create rolebinding dev-user-binding --role=developer --user=dev-user  
+```
+
+### can-i
+- To check authorization to perform certain action
+```bash
+kubectl auth can-i create deployments
+kubectl auth can-i delete nodes
+
+----------------
+
+kubectl auth can-i create deployments --as dev-user [--namespace name]
+```
+
 ### Quick Notes:
 - Names and labels are children of metadata.
 - Lables is a dictionary under metadata dictionary.
