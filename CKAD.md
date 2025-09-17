@@ -3,6 +3,12 @@
 
 ## Core Concepts:
 - Nodes were initially called minions.
+- If the questions says 'container level' means container level, not deployment level.
+
+### Copy one File Contents to Another
+```bash
+cp one.yaml two.yaml
+```
 
 ### Base64 Encoding and Decoding
 ```bash
