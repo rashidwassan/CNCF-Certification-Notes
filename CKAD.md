@@ -591,3 +591,55 @@ spec:
 2. Using vim, use set paste command to paste stuff without affecting the indentation.
 3. 4
 
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dice
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      completions: 1
+      backoffLimit: 25
+      activeDeadlineSeconds: 20
+      template:
+        spec:
+          containers:
+          - name: throw-a-dice-container
+            image: kodekloud/throw-dice
+            imagePullPolicy: IfNotPresent
+          restartPolicy: Never
+```
+
+```yaml
+piVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-vh-routing
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "watch.ecom-store.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/video"
+        backend:
+          service:
+            name: video-service
+            port:
+              number: 8080
+  - host: "apparels.ecom-store.com"
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/wear"
+        backend:
+          service:
+            name: apparels-service
+            port:
+              number: 8080
+```
