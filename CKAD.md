@@ -3,6 +3,29 @@
 
 ## Core Concepts:
 - Nodes were initially called minions.
+- If the questions says 'container level' means container level, not deployment level.
+- Target port in service must match the port exposed by the container.
+
+### Creating Docker Image and Exporting it in .tar File:
+```bash
+docker build -t my-image .
+
+docker run -d --name my-container my-image
+
+docker export -o exported-image.tar my-container
+
+docker import my-image.tar imported-image
+```
+
+### Check Resource Quota
+```bash
+kubectl describe ns namespacename
+```
+
+### Copy one File Contents to Another
+```bash
+cp one.yaml two.yaml
+```
 
 ### Base64 Encoding and Decoding
 ```bash
