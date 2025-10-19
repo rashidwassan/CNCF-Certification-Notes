@@ -128,7 +128,7 @@ spec:
   - To save snapshot: `etcdctl snapshot save snapshot.db`
   - To get info about snapshot: `etcdctl snapshot status snapshot.db`
   - To restore data from snapshot:
-    - `systemctl stop kube-apiserver`
+    - `systemctl stop kube-apiserver` or stop API-Server Pod
     - `etcdctl snapshot restore snapshot.db --data-dir /var/lib/etcd-from-backup`
     - Update `--data-dir /var/lib/etcd-from-backup` in etcd service (can be done in manifest)
     - `systemctl daemon-reload`
@@ -323,6 +323,17 @@ helm install my-release bitnami/wordpress --version 7.1.0
 helm list
 ```
 
+- Upgrading a Release
+```bash
+helm list
+helm repo list
+helm repo update
+helm search nginx (chartname)
+helm search repo nginx --versions
+helm search repo nginx --versions | grep 18.1.5
+helm upgrade myrelease kk-mock1/nginx --version 18.1.15 -n mynamespace
+```
+
 - Uninstalling a Release
 ```bash
 helm uninstall my-release
@@ -348,7 +359,6 @@ helm install my-release ./wordpress
 
 ### Installing Kubernetes
 
-### 
 
 ### Troubleshooting
 - Control Plane Failure:
@@ -361,6 +371,292 @@ helm install my-release ./wordpress
 
 
 ### Networking in Kubernetes
+- port: 8080:80 means port 80 of container can be accessed by port 8080 on host.
+- Check for open ports on nodes (inbound):
+  - 6443 on master
+  - 10250 for Kubelet
+  - 10259 for Kube Scheduler
+  - 10257 for Kube Controller Manager
+  - 2379, 2380 for ETCD
+  - 30,000-32,767 for NodePort Services on Worker Nodes
 
+- Check for default gateway: `ip route show default`
+- To check what applications are listening on what port: `netstat`
+- To check for connections on port: `netstat -anp | grep etcd`
+
+- CNI Directory: `ls /opt/cni/bin`
+- CNI Config Directory: `ls /etc/cni/net.d` - used to check what CNI is being used in cluster.
+
+- Checking pod to pod connection: `kubectl exec -it SOURCE-POD-NAME -- curl -m 5 DESTINATION-POD-IP`
+
+- Cluster CIDR can be found in Kube-Controller-Manager's manifest.
+- Cluster IP range for services can be found in Kube-API Server's manifest.
+
+- CoreDNS Config File Location: mentioned in args of coredns deployments.
+
+### Ingress
+- Create ingress in imperative way:
+```bash
+kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"**
+```
+
+### Gateway API
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: nginx-gateway
+  namespace: nginx-gateway
+spec:
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      allowedRoutes: 
+        namespaces: 
+          from: All
+```
+
+- Creating a rule with parent ref of a Gateway in another namespace:
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: frontend-route
+  namespace: default
+spec:
+  parentRefs:
+    - name: nginx-gateway           # Name of the Gateway
+      namespace: nginx-gateway      # Namespace where the Gateway is deployed
+      sectionName: http             # Attach to the 'http' listener
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend-svc
+          port: 80
+```
 
 ### Scenario Based Questions and their Solutions: 
+- Listing Deployments in Alphabetical Order
+
+```bash
+kubectl -n admin2406 get deployment -o custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[].image,READY_REPLICAS:.status.readyReplicas,NAMESPACE:.metadata.namespace --sort-by=.metadata.name > /opt/admin2406_data
+```
+
+- Updating a deployment using Rolling Update
+```bash
+kubectl set image deploy nginx-deploy nginx=nginx:1.17
+
+kubectl annotate deployment nginx-deploy description="Updated nginx image to 1.17"
+  
+```
+
+- Installing a .deb package:
+```bash
+dpkg -i ./filename.deb
+systemctl start service-name
+systemctl enable service-name
+```
+
+- Exposing a Pod Imperatively (Creating Service):
+```bash
+k expose pod podname --port=123 --name=servicename
+```
+
+- Upgrading a Release
+```bash
+helm list
+helm repo list
+helm repo update
+helm search chartnamehere
+helm search repo nginx --versions
+helm search repo nginx --versions | grep 18.1.5
+helm upgrade myrelease kk-mock1/nginx --version 18.1.15 -n mynamespace
+helm lint ./directorynamehavingchartinit
+```
+
+- Troubleshoot Ingress
+```bash
+k get ingressclass
+```
+- And then set ingressClassName to the one.
+
+
+- Gateway with HTTPS and TLS Secret Ref:
+```yaml
+# web-gateway.yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web-gateway
+  namespace: cka5673
+spec:
+  gatewayClassName: kodekloud
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: kodekloud.com
+      tls:
+        certificateRefs:
+          - name: kodekloud-tls
+```
+
+- Getting Node CIDR:
+```bash
+kubectl get node controlplane -o jsonpath='{.spec.podCIDR}' > /root/pod-cidr.txt
+```
+
+- Network policy to allow all ingress on a pod:
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ingress-to-nptest
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      run: np-test-1
+  policyTypes:
+  - Ingress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 80
+```
+
+- HTTP Route with Weights:
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-route
+  namespace: default
+spec:
+  parentRefs:
+    - name: web-gateway
+      namespace: default
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: web-service
+          port: 80
+          weight: 80
+        - name: web-service-v2
+          port: 80
+          weight: 20
+```
+
+- Restore ETCD Backup
+```bash
+ETCDCTL_API=3 etcdctl --data-dir="/var/lib/etcd-backup" \
+--endpoints=https://127.0.0.1:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+snapshot restore etcd-backup.db
+```
+
+- Prepare Linux System for Kubeadm:
+```bash
+sudo dpkg -i /dir/cri-dockerd.deb
+sudo systemctl enable --now cri-dockerd.service
+
+vi /etc/sysctl.d/cka.conf (and paste provided values in file)
+sudo sysctl --system
+```
+
+- Install ArgoCD Using Helm:
+```bash
+helm repo add argo https://argoproj.github.io/argo-helm
+k create ns argocd
+```
+
+- Install CNI
+```bash
+k get pods -A | grep -E 'calico|canal|flannel|weave|cni' (and delete pods/ds if there)
+sudo rm -rf /etc/cni/net.d/*
+
+Then install (download custom resources using wget and set spec.calicoNetwork.bgp: Disabled, and change pod CIDR usually /24)
+```
+
+### Sidecar Task
+  - Visit sidecar Kubernetes docs.
+  - Use emptyDir as volume type.
+
+### Gateway API Task
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: web-gateway
+spec:
+  gatewayClassName: nginx-class
+  listeners:
+  - name: https
+    protocol: HTTPS
+    port: 443
+    hostname: "gateway.web.k8s.local"
+    tls:
+      mode: Terminate
+      certificateRefs:
+        - kind: secret
+          name: web-tls
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: web-route
+spec:
+  parentRefs:
+  - name: web-gateway
+  hostnames:
+  - "gateway.web.k8s.local"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: web-service
+      port: 80
+```
+
+### Pod Resource Allocation Task
+**For memory**:
+  - Describe node and extract allocatable memory in Ki.
+  - Convert memory in to Mi by dividing the Ki value 1024.
+  - Calculate already used memory and subtract it from the allocatatble memory.
+  - Finally, subtract 10% overhead memory value from allocatable memory, divide the final value by number of deployment pods to find how much memory can be allocated to each pod.
+
+**For CPU (milis - unit of 1000):**
+  - Describe node and find allocatable CPU.
+  - Subtract the sum of used CPU on the node from the total allocatable value.
+  - Calculate 10% overhead and subtract from the result fo step 2.
+  - Now divide it by the number of proposed pods for the deployment.
+
+**Optional (If Asked to Add Limits):**
+  - Keep limit a bit higher than request value.
+
+### For Storage Class
+ - Use minimal template from docs with default annotation as it is.
+ - To reconfigure it as a default storageclass, use:
+   - `k patch sc local-sc -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class": "true"}}}'
+  
+### Patch a Deployment with PriorityClass
+- Use comamnd:
+```bash
+    k patch deploy busybox-logger -p '{"spec":{"template":{"spec": {"priorityClassName":"high-priority"}}}}'
+```
