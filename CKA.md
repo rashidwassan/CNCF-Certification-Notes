@@ -1,13 +1,25 @@
 # CKA
 
+## How to refer to these notes?
+- These are very precise notes for CKA exam with all the essential concepts and commands that you need to know in order to pass the exam.
+- Practice or at least remember Vim commands to save your time during the exams. Deleting chunks of code, indenting, and other modification operations tend to consume a lot of time if not performed smartly.
+- Almost 70% of the solutions can be found in the documentation, so, I have added doc links so taht you can be familiar and extract code from docs instead of memorizing it. Just make sure to be smart enough to solve scenario based questions using Docs.
+- Take out a day or two before the exam and solve the scenario based questions given at the end.
+- Memorize only the keys and values that are very difficult to find on the respective documentation page. All other snippets and code can be extracted from docs, reducing preparation load.
+- TIP: To be quick in the exam, try doing control+f to find the desired snippet, like I want to directly fine the snippet of persistent volume, I can search 'kind: persistentvolume' to directly scroll to the snippet. Since the UI is slow, this trick works extremely well.
+
 ## Some Important Linux Commands
 - To check OS info: `cat /etc/*release*`.
 
 ## VIM Shortcuts
 
-### Useful Range Commands
-- Command `:startline,endline>` like: `:35,53>` for one indent.
-- Command `:startline,endlined` like: `35,53d>` to delete the chunk.
+### Useful VIM Commands
+- Command `:startlinenumber,endline>` like: `:35,53>` for one indent forward.
+- Command `:startlinenumber,endline>` like: `:35,53>>` for double indent forward.
+- Command `:startlinenumber,endline>` like: `:35,53<` for one level indent removal.
+- Command `:startlinenumber,endline>` like: `:35,53<<` for two level indent removal.
+- Command `:startlinenumber,endline` like: `35,53d` to delete the chunk.
+- Tip: to delete a complete line, exit the insert mode, and press `dd`, it will remove the selected line. 
 
 ## Scheduling
 
@@ -42,20 +54,38 @@ clientConnection:
   kubeconfig: "/etc/kubernetes/scheduler.conf"
 
 ```
+- If anything related to scheduler profiling appears in the exam, [this page](https://kubernetes.io/docs/reference/scheduling/config/), is all you need to go through.
+- Refer to the above given snippet and remember the only key that you might not find the documentation.
 
 ### Labels and Selectors
 - `--show-labels` can be used to list down resources with their labels diplayed.
 - `-l key=value` when added to get command, retrieves resources with key:value label applied.
-  - ```bash
-       k get pods -l env=prod,bu=finance,tier=frontend
-       ```
+```bash
+# lists resources with their labels
+kubectl get deployments --show-labels
+
+# lists pods with specific labels applied
+kubectl get pods -l env=prod,bu=finance,tier=frontend
+```
 ### Taints and Tolerations
-- `k describe node node01 | grep -i 'taints'`
-- `k taint node node01 spray=mortein:NoSchedule`
-- Removing a taint: `k taint node node01 spray=mortein:NoSchedule-`.
+- Below are some quick ways to apply or remove taints to/from nodes.
+```bash 
+# Listing taints applied to a node.
+kubectl describe node node01 | grep -i 'taints'
+
+# Adding a taint.
+kubectl taint node node01 spray=mortein:NoSchedule`
+
+# Removing a taint:
+kubectl taint node node01 spray=mortein:NoSchedule-
+```
+- For making pods tolerate these taints, you can refer [this page](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) during exam if needed.
 
 ### Node Affinity
-- To label a node `k label node node01 color=blue`.
+- To label a node:
+```bash 
+kubectl label node node01 color=blue
+```
 - To add NodeAffinity to a Deployment:
 - Add following snippet under `spec.template.spec`
 ``` yaml
@@ -69,6 +99,7 @@ affinity:
           values:
           - blue
 ```
+- If there is any question regarding scheduling a pod or deployment to a specific node, you might need to refer node affinity, on [this page](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/).
 
 ### Priority Classes
 - Can't be changed at runtime.
@@ -78,7 +109,17 @@ affinity:
 ```bash
 k create priorityclass high-priority --value=100000 --global-default=false --preemption-policy=PreemptLowerPriority
 ```
-TODO: LABS TO BE CONTINUED
+- PriorityClass YAML Code:
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000000
+globalDefault: false
+description: "Any description here."
+```
+- This code is all you need for the exam, you can get this snippet during the exam from [pod priority preemption](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/) page.
 
 ## Custom Scheduler for Pod
 ```yaml
@@ -94,7 +135,8 @@ spec:
 ```
 
 ## JSON Path in Kubernetes
-
+- Jsonpath support in Kubectl allows you to retrieve any data field from any resource, this is usually used to obtain custom output from kubectl get commands, important for exams.
+- Refering to [this page](https://kubernetes.io/docs/reference/kubectl/jsonpath/) and getting little familiar with syntax is all you need.
 
 ## Cluster Maintenance
 - Operating System Upgrade
@@ -115,10 +157,10 @@ spec:
   - `systemctl restart kubelet`
   - `kubectl uncordon node01`
 - For worker nodes, only kubelet update is needed.
+- ⚠️ IMPORTANT: You do not need to remember any of these commands, you can find all here on [this page](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/).
+- If you do not see the version required, visit [this page](https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/change-package-repository/#verifying-if-the-kubernetes-package-repositories-are-used) to update package repoistory.
+- These both pages are accessible during the exam, make sure to perform an upgrade at least a once using these docs before appearing in the exam.
 
-
-### Designing a Kubernetes Cluster
-- 
 
 ### Backups
 - Resource Configuration
@@ -139,8 +181,6 @@ spec:
 - For offline file-level backup of the data directory:
 > etcdutl backup \ --data-dir /var/lib/etcd \ --backup-dir /backup/etcd-backup
 - To use a backup made with etcdutl backup, simply copy the backup contents back into /var/lib/etcd and restart etcd.
-
-- Persistent Volumes
 
 ### Admissions Controlers
 - Mutating Admission Controllers run Before Validating Admission Controllers so that mutations can be validated afterwards.
@@ -442,14 +482,16 @@ spec:
           port: 80
 ```
 
+## IMPORTANT ⚠️
+
 ### Scenario Based Questions and their Solutions: 
-- Listing Deployments in Alphabetical Order
+## Listing Deployments in Alphabetical Order
 
 ```bash
 kubectl -n admin2406 get deployment -o custom-columns=DEPLOYMENT:.metadata.name,CONTAINER_IMAGE:.spec.template.spec.containers[].image,READY_REPLICAS:.status.readyReplicas,NAMESPACE:.metadata.namespace --sort-by=.metadata.name > /opt/admin2406_data
 ```
 
-- Updating a deployment using Rolling Update
+## Updating a deployment using Rolling Update
 ```bash
 kubectl set image deploy nginx-deploy nginx=nginx:1.17
 
@@ -457,19 +499,19 @@ kubectl annotate deployment nginx-deploy description="Updated nginx image to 1.1
   
 ```
 
-- Installing a .deb package:
+## Installing a .deb package (you might be required to install and enable a servic on Node):
 ```bash
 dpkg -i ./filename.deb
 systemctl start service-name
 systemctl enable service-name
 ```
 
-- Exposing a Pod Imperatively (Creating Service):
+## Exposing a Pod Imperatively (Creating Service):
 ```bash
 k expose pod podname --port=123 --name=servicename
 ```
 
-- Upgrading a Release
+## Upgrading a Helm Release
 ```bash
 helm list
 helm repo list
@@ -488,7 +530,7 @@ k get ingressclass
 - And then set ingressClassName to the one.
 
 
-- Gateway with HTTPS and TLS Secret Ref:
+## Gateway with HTTPS and TLS Secret Ref:
 ```yaml
 # web-gateway.yaml
 apiVersion: gateway.networking.k8s.io/v1
@@ -507,13 +549,15 @@ spec:
         certificateRefs:
           - name: kodekloud-tls
 ```
+- IMPORTANT: if there is any task for updating or creating gatway to use HTTPS protoocl, use the snippet given above, protocol, port will change, also, hostname can be added if mentioned in the question.
+- You can use tls feild to use tls secret from any already running ingress.
 
 - Getting Node CIDR:
 ```bash
 kubectl get node controlplane -o jsonpath='{.spec.podCIDR}' > /root/pod-cidr.txt
 ```
 
-- Network policy to allow all ingress on a pod:
+## Network policy to allow all ingress on a pod:
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -532,7 +576,7 @@ spec:
       port: 80
 ```
 
-- HTTP Route with Weights:
+## HTTP Route with Weights:
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -557,7 +601,7 @@ spec:
           weight: 20
 ```
 
-- Restore ETCD Backup
+## Restore ETCD Backup
 ```bash
 ETCDCTL_API=3 etcdctl --data-dir="/var/lib/etcd-backup" \
 --endpoints=https://127.0.0.1:2379 \
@@ -567,7 +611,7 @@ ETCDCTL_API=3 etcdctl --data-dir="/var/lib/etcd-backup" \
 snapshot restore etcd-backup.db
 ```
 
-- Prepare Linux System for Kubeadm:
+## Prepare Linux System for Kubeadm:
 ```bash
 sudo dpkg -i /dir/cri-dockerd.deb
 sudo systemctl enable --now cri-dockerd.service
@@ -576,13 +620,14 @@ vi /etc/sysctl.d/cka.conf (and paste provided values in file)
 sudo sysctl --system
 ```
 
-- Install ArgoCD Using Helm:
-```bash
-helm repo add argo https://argoproj.github.io/argo-helm
-k create ns argocd
-```
+## Install ArgoCD using Helm:
+1. helm repo add argo https://argoproj.github.com/argo-helm
+2. k create ns argocd
+3. helm template argocd argo/argo-cd --namespace=argocd --version 7.7.3 --set crds.install=false > /argo-helm.yaml
+4. helm install argocd argo/argo-cd --namespace=argocd --version 7.7.3 --set crds.install=false
+5. k get pods - argocd
 
-- Install CNI
+### Install CNI
 ```bash
 k get pods -A | grep -E 'calico|canal|flannel|weave|cni' (and delete pods/ds if there)
 sudo rm -rf /etc/cni/net.d/*
@@ -660,3 +705,46 @@ spec:
 ```bash
     k patch deploy busybox-logger -p '{"spec":{"template":{"spec": {"priorityClassName":"high-priority"}}}}'
 ```
+
+### Create HPA for a deployment with cooldown window:
+- Get the template from horizontal pod autoscaling documentation page.
+- Add this snippet under spec (this was tricky to find):
+```yaml
+behavior:
+  scaleDown:
+    stabilizationWindowSeconds: 300
+```
+
+### NodePort Service that Exposes the Deployment using TCP Protocol, and also its pods are being exposed.
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+namespace: namespacename
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      nodePort: 30007
+```
+
+## Fix Broken Cluster that was Using Old ETCD Server:
+- journalctl -u kubelet -f
+- cd /etc/kubernetes/manifests
+- vi kube-apiserver.yaml
+- update ETCD IP or port number, set port to 2379 and adress to 127.0.0.1 (etcd --listen-clients-urls)
+- sudo systemctl restart kubelet
+- check other manifest files if issues persist
+
+
+## Create PriorityClass and Patch the Deployment to Use it:
+- k get pc
+- get value from user critical pc and use 'expr 1235374 - 1' or that particular value to get exact -1 than that.
+- create new pc with that priority (priority class code can be found in documentation)
+- kubectl patch deploy busybox-logger -n priority -p {"spec": {"template":{"spec":{"priorityClassName":"high-priority"}}}}'
+- k rollout restart deploy busybox-logger -n priority
