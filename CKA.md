@@ -464,7 +464,7 @@ spec:
 ```yaml
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
-metadata:
+metadata: 
   name: frontend-route
   namespace: default
 spec:
