@@ -17,3 +17,85 @@
 
 ### SLA (Service Level Agreement)
 - Contract between a vendor and a user that guarantees a certain SLO.
+
+## Prometheus Fundamentals
+- Prometheus is an open-source monitoring tool that collects metrics data, and provide tools to visualize the collected data.
+- Allows the generation of alerts when metrics reach a defined threshold.
+
+### Prometheus Architecture
+- Retrieval
+- TSDB
+- HTTP Server
+- Exporters
+
+- `Pull-based` approach to fetch metrics.
+- Support of `Pushgateway` for short lived jobs.
+
+- Service Discovery support provides dynamic discovery of targets.
+- Altertmanager used to send alters to emails or Slack integration.
+- Prometheus web ui for visualizing data.
+
+### Collecting Metrics
+- Prometheus collects metrics by sending http requests to `/metrics` endpoint of each target.
+- Prometheus can be configured to use a different path other than */metrics*.
+- Most systems do not collect metrics by default and expose them on HTTP endpoint.
+- `Exporters` collect metrics and expose them in a format Prometheus expects.
+- Prometheus has several native exporters: Node exporters, Windows, MySQL, Apache, HAProxy.
+
+> Pull based system provides funcitonality to identify if the target is down. Pull based systems have a definitive list of targets to monitor, creating a central source of truth.
+
+> Push based systems can potentially overload mertrics server if too many incoming connections get flooded at the same time. They are best choice for event based systems. *Prometheus is for collecting metrics, not for monitoring events*.
+
+### Installing Prometheus (Systemd)
+1. **Creating user**
+```bash
+# Creating an application user with no to login functionality.
+sudo useradd --no-create-home --shell /bin/false prometheus
+```
+
+2. **Setting up config**
+```bash
+sudo mkdir /etc/prometheus # config dir
+sudo mkdir /var/lib/prometheus # data dir
+
+# Update permissions
+sudo chown prometheus:prometheus /etc/prometheus
+sudo chown prometheus:prometheus /var/lib/prometheus
+```
+
+3. **Download & Install Binary**
+```bash
+wget <the-binary-link>
+tar xvf prometheus-2.37.0.linux-amd64.tar.gz
+
+sudo cp prometheus /usr/local/bin
+sudo cp promtool /usr/local/bin
+
+# update permissions
+sudo chown prometheus:prometheus /usr/local/bin/prometheus
+sudo chown prometheus:prometheus /usr/local/bin/promtool
+
+# Copy dashboard and visualization data
+sudo cp -r consoles /etc/prometheus
+sudo cp -r console_libraries /etc/prometheus
+
+sudo chown -R prometheus:prometheus /etc/prometheus/consoles
+sudo chown -R prometheus:prometheus /etc/prometheus/console_libraries
+
+# Copy config file
+sudo cp prometheus.yaml /etc/prometheus/prometheus.yaml
+sudo chown prometheus:prometheus /etc/prometheus/prometheus.yaml
+
+# Start prometheus
+sudo -u prometheus /usr/local/bin/prometheus \
+--config.file /etc/prometheus/prometheus.yaml \
+--storage-tsdb.path /var/lib/prometheus/ \
+--web.console.templates=/etc/prometheus/consoles \
+--web.console.libraries=etc/prometheus/console_libraries
+```
+
+4. **Create Prometheus service**
+```bash
+sudo vi /etc/systemd/system/prometheus.service
+```
+![Prometheus.serive file content](prometheus/svc.png)
