@@ -94,8 +94,131 @@ sudo -u prometheus /usr/local/bin/prometheus \
 --web.console.libraries=etc/prometheus/console_libraries
 ```
 
-4. **Create Prometheus service**
+4. **Create and Enable Prometheus service on Startup**
 ```bash
 sudo vi /etc/systemd/system/prometheus.service
+sudo systemctl enable prometheus.service
 ```
-![Prometheus.serive file content](prometheus/svc.png)
+![Prometheus.service file content](prometheus/svc.png)
+
+5. **Installing Node Exporter (on Linux hosts that need to be monitored)**
+```bash
+# Go to prometheus website and download the latest binary using wget
+wget <node-exporter-download-link>
+tar -xvf filename.tar.gz
+cd <extracted-folder> # there will be *node_exporter* executable inside it.
+
+sudo cp node_exporter /usr/local/bin/
+
+# Create a user
+sudo useradd --no-create-home --shell /bin/false node_exporter
+
+# Create service by following the process similar to what we did for prometheus setup.
+
+# Check if metrics are being exported
+curl localhost:9100/metrics
+```
+
+### Prometheus Config
+```yaml
+# This is the main configuration file for Prometheus.
+# It defines:
+# - Global behavior (scrape & evaluation intervals)
+# - Where Prometheus scrapes metrics from
+# - Alerting and rule files
+
+# Global Configuration
+global:
+  # How frequently Prometheus scrapes targets
+  # Default is 1m, but 15s is common for faster observability
+  scrape_interval: 15s
+
+  # How frequently Prometheus evaluates alert rules
+  evaluation_interval: 15s
+
+  # Timeout for scraping a target before marking it as failed
+  scrape_timeout: 10s
+
+
+# Alertmanager Configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            # Alertmanager endpoint(s)
+            # Use hostname:port (default port is 9093)
+            - "alertmanager:9093"
+
+# Files that contain alerting rules and/or recording rules
+rule_files:
+  # Load all rule files from this directory
+  - "rules/*.yml"
+
+# Each scrape_config defines a set of targets Prometheus will scrape
+scrape_configs:
+  # Prometheus Self-Monitoring
+  - job_name: "prometheus"
+
+    # Override global scrape interval for this job (optional)
+    scrape_interval: 15s
+
+    static_configs:
+      - targets:
+          # Prometheus exposes its own metrics on /metrics
+          - "localhost:9090"
+
+  # Node Exporter (Linux Hosts)
+  - job_name: "node_exporter"
+
+    static_configs:
+      - targets:
+          # Node Exporter default port is 9100
+          - "node-exporter:9100"
+
+  # Application Metrics
+  - job_name: "my_application"
+
+    # Path where the app exposes metrics
+    metrics_path: "/metrics"
+
+    # HTTP scheme (http or https)
+    scheme: "http"
+
+    static_configs:
+      - targets:
+          # Replace with your app host(s)
+          - "app:8080"
+
+        # Custom labels help identify metrics later
+        labels:
+          environment: "production"
+          service: "backend-api"
+
+  # --------------------------
+  # Kubernetes (Example)
+  # --------------------------
+  # This section demonstrates dynamic service discovery
+  # Uncomment and adjust if running inside Kubernetes
+  #
+  # - job_name: "kubernetes-pods"
+  #   kubernetes_sd_configs:
+  #     - role: pod
+  #
+  #   relabel_configs:
+  #     # Only scrape pods that have prometheus.io/scrape=true
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+  #       action: keep
+  #       regex: "true"
+  #
+  #     # Use the annotated metrics path
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+  #       action: replace
+  #       target_label: __metrics_path__
+  #
+  #     # Use the annotated port
+  #     - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+  #       action: replace
+  #       regex: (.+):(?:\d+);(\d+)
+  #       replacement: $1:$2
+  #       target_label: __address__
+```
